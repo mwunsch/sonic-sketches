@@ -1,36 +1,16 @@
 # sonic-sketches
 
-FIXME: description
+Studies in Overtone and Clojure (and CIDER and Lein).
 
-## Installation
+From that Wikipedia:
 
-Download from http://example.com/FIXME.
+> Studies are often used to understand the problems involved in rendering subjects and to plan the elements to be used in finished works, such as light, color, form, perspective and composition.
 
-## Usage
+This is a repository to house my attempts to better understand the problems involved in:
 
-FIXME: explanation
++ Overtone, and programming music in general
++ Clojure, its libraries and idioms
++ CIDER, and being productive in Clojure from within Emacs
++ Leiningen, and the ecosystem around Clojure on the JVM
 
-    $ java -jar sonic-sketches-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
-
-## License
-
-Copyright © 2015 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+It is not intended to be of much use to anyone else, but I hope to learn about these subjects so as to build something more compelling at a later point in time.
