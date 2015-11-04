@@ -1,7 +1,11 @@
 (ns sonic-sketches.core
+  (:use [overtone.live])
   (:gen-class))
 
+(definst mousedrums []
+  (example membrane-circle :mouse))
+
 (defn -main
-  "I don't do a whole lot ... yet."
+  "I like to play the drums by clicking my mouse on the screen."
   [& args]
-  (println "Hello, World!"))
+  (mousedrums))
