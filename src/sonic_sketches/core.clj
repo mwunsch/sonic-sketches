@@ -8,4 +8,5 @@
 (defn -main
   "I like to play the drums by clicking my mouse on the screen."
   [& args]
-  (mousedrums))
+  (demo (example dbrown :rand-walk))
+  (after-delay *demo-time* #(println "Okay done")))
