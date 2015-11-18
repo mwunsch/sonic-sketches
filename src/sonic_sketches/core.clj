@@ -9,4 +9,4 @@
   "I like to play the drums by clicking my mouse on the screen."
   [& args]
   (demo (example dbrown :rand-walk))
-  (after-delay *demo-time* #(println "Okay done")))
+  (after-delay *demo-time* #(System/exit 0)))
