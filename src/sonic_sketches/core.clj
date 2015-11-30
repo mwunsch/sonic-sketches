@@ -5,15 +5,18 @@
 (definst mousedrums []
   (example membrane-circle :mouse))
 
-(defn play-then-quit
+(defn play
   "Demo synth for n millis, then exit"
-  [t ugen-fn]
+  [ugen-fn callback]
   (recording-start "./sounds/test.wav")
-  (ugen-fn)
-  (after-delay t (fn [] ((do (recording-stop)
-                            (System/exit 0))))))
+  (let [synth (ugen-fn)
+        node-id (:id synth)]
+    (on-event [:overtone :node-destroyed node-id] (fn [ev] (do
+                                                            (recording-stop)
+                                                            (callback))) ::synth-destroyed-handler)))
 
 (defn -main
   "I like to play the drums by clicking my mouse on the screen."
   [& args]
-  (play-then-quit *demo-time* #(demo (example dbrown :rand-walk))))
+  (play #(demo (example dbrown :rand-walk))
+        #(println "Stopped!")))
