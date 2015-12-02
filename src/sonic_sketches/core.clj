@@ -9,11 +9,12 @@
   "Demo synth for n millis, then exit"
   [ugen-fn callback]
   (recording-start "./sounds/test.wav")
-  (let [synth (ugen-fn)
-        node-id (:id synth)]
-    (on-event [:overtone :node-destroyed node-id] (fn [ev] (do
-                                                            (recording-stop)
-                                                            (callback))) ::synth-destroyed-handler)))
+  (after-delay 1500
+               #(let [synth (ugen-fn)
+                     node-id (:id synth)]
+                 (on-event [:overtone :node-destroyed node-id] (fn [ev] (do
+                                                                         (recording-stop)
+                                                                         (callback))) ::synth-destroyed-handler))))
 
 (defn -main
   "I like to play the drums by clicking my mouse on the screen."
