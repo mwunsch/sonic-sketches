@@ -6,7 +6,7 @@
   (example membrane-circle :mouse))
 
 (defn play
-  "Demo synth for n millis, then exit"
+  "Record a fn that starts a synth-node and call a callback when that node is destroyed."
   [ugen-fn callback]
   (recording-start "./sounds/test.wav")
   (after-delay 1500
@@ -17,7 +17,6 @@
                                                                          (callback))) ::synth-destroyed-handler))))
 
 (defn -main
-  "I like to play the drums by clicking my mouse on the screen."
   [& args]
   (play #(demo (example dbrown :rand-walk))
         #(println "Stopped!")))
