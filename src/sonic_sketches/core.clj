@@ -41,10 +41,29 @@
         ]
     (out 0 (pan2 (* volume VCF) pan))))
 
-(defn play-monotron [tron nome note]
-  (let [beat (nome)]
-    (at (nome beat) (ctl tron :note note))
-    (apply-by (nome (inc beat)) #'play-monotron [tron nome (choose (scale :C4 :major))])))
+(def jingle-bells
+  [{:pitch (note :E4) :duration 1/4}
+   {:pitch (note :E4) :duration 1/4}
+   {:pitch (note :E4) :duration 1/2}
+   {:pitch (note :E4) :duration 1/4}
+   {:pitch (note :E4) :duration 1/4}
+   {:pitch (note :E4) :duration 1/2}
+   {:pitch (note :E4) :duration 1/4}
+   {:pitch (note :G4) :duration 1/4}
+   {:pitch (note :C4) :duration 1/4}
+   {:pitch (note :D4) :duration 1/4}
+   {:pitch (note :E4) :duration 1}])
+
+(defn play-monotron
+  "Accepts a monotron synth, a metronome, and a sequence of maps with :pitch and :duration"
+  [tron nome notes]
+  (let [beat (nome)
+        note (first notes)]
+    (if (some? note)
+      (at (nome beat) (ctl tron :note (:pitch note)))
+      (apply-by (nome (inc beat)) #(kill tron)))
+    (apply-by (+ (nome (inc beat)) (* (metro-tick nome) (:duration note)))
+              #'play-monotron [tron nome (rest notes)])))
 
 (defn play
   "Record a fn that starts a synth-node and call a callback when that node is destroyed."
