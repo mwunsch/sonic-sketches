@@ -58,7 +58,7 @@
   "Accepts a monotron synth, a metronome, and a sequence of maps with :pitch and :duration"
   [tron nome notes]
   (let [beat (nome)
-        note (first notes)]
+        {pitch :pitch duration :duration :as note} (first notes)]
     (if (some? note)
       (at (nome beat) (ctl tron :note (:pitch note)))
       (apply-by (nome (inc beat)) #(kill tron)))
