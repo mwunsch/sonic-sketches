@@ -1,5 +1,6 @@
 (ns sonic-sketches.core
   (:use [overtone.live])
+  (:require [overtone.inst.synth])
   (:gen-class))
 
 ;; ======================================================================
@@ -60,9 +61,9 @@
   (let [beat (nome)
         {pitch :pitch duration :duration :as note} (first notes)]
     (if (some? note)
-      (at (nome beat) (ctl tron :note (:pitch note)))
+      (at (nome beat) (ctl tron :note pitch))
       (apply-by (nome (inc beat)) #(kill tron)))
-    (apply-by (+ (nome (inc beat)) (* (metro-tick nome) (:duration note)))
+    (apply-by (+ (nome (inc beat)) (* (metro-tick nome) duration))
               #'play-monotron [tron nome (rest notes)])))
 
 (defn play
