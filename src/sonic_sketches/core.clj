@@ -47,9 +47,13 @@
    {:pitch (note :E4) :duration 1/4}
    {:pitch (note :E4) :duration 1/2}
 
+   {:pitch nil :duration 1/8}
+
    {:pitch (note :E4) :duration 1/4}
    {:pitch (note :E4) :duration 1/4}
    {:pitch (note :E4) :duration 1/2}
+
+   {:pitch nil :duration 1/8}
 
    {:pitch (note :E4) :duration 1/4}
    {:pitch (note :G4) :duration 1/4}
@@ -57,6 +61,8 @@
    {:pitch (note :D4) :duration 1/4}
 
    {:pitch (note :E4) :duration 1}
+
+   {:pitch nil :duration 1/4}
 
    {:pitch (note :F4) :duration 1/4}
    {:pitch (note :F4) :duration 1/4}
@@ -77,20 +83,19 @@
    ])
 
 (defn play
-  "Accepts a monotron synth, a metronome, and a sequence of maps with :pitch and :duration"
+  "Accepts a metronome, and a sequence of maps with :pitch and :duration"
   [nome notes]
   (let [beat (nome)
         {pitch :pitch duration :duration :as note} (first notes)
         decay (* (metro-tick nome) duration)]
-    (at (nome beat) (overtone.inst.synth/tb303
-                     :note pitch
-                     :cutoff 1050
-                     :decay (/ decay 1000)
-                     :wave 0
-                     :delay 0.65))
+    (when (some? pitch) (at (nome beat) (overtone.inst.synth/tb303
+                            :note pitch
+                            :cutoff 1050
+                            :decay (/ decay 1000)
+                            :wave 0
+                            :delay 0.65)))
     (apply-by (+ (nome (inc beat)) decay) #'play [nome (rest notes)])))
 
 (defn -main
   [& args]
-  (play #(demo (example dbrown :rand-walk))
-        #(println "Stopped!")))
+  (play (metronome 220) jingle-bells))
