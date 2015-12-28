@@ -83,21 +83,43 @@
    ])
 
 (def auld-lang-syne
-  [{:pitch (note :C3) :duration 1/4}
-   {:pitch (note :F3) :duration 1/4}
-   {:pitch (note :F3) :duration 1/8}
-   {:pitch (note :F3) :duration 1/4}
-   {:pitch (note :A3) :duration 1/4}
-   {:pitch (note :G3) :duration 1/4}
-   {:pitch (note :F3) :duration 1/8}
-   {:pitch (note :G3) :duration 1/4}
-   {:pitch (note :A3) :duration 1/4}
-   {:pitch (note :G3) :duration 1/4}
-   {:pitch (note :F3) :duration 1/4}
-   {:pitch (note :F3) :duration 1/8}
-   {:pitch (note :A3) :duration 1/4}
+  [{:pitch (note :C4) :duration 1/4}
+
+   {:pitch (note :F4) :duration 3/8}
+   {:pitch (note :F4) :duration 1/8}
+   {:pitch (note :F4) :duration 1/4}
+   {:pitch (note :A4) :duration 1/4}
+
+   {:pitch (note :G4) :duration 3/8}
+   {:pitch (note :F4) :duration 1/8}
+   {:pitch (note :G4) :duration 1/4}
+   {:pitch (note :A4) :duration 1/8}
+   {:pitch (note :G4) :duration 1/8}
+
+   {:pitch (note :F4) :duration 3/8}
+   {:pitch (note :F4) :duration 1/8}
+   {:pitch (note :A4) :duration 1/4}
+   {:pitch (note :C5) :duration 1/4}
+   {:pitch (note :D5) :duration 3/4}
+   {:pitch (note :D5) :duration 1/4}
+
+   {:pitch (note :C5) :duration 3/8}
+   {:pitch (note :A4) :duration 1/8}
+   {:pitch (note :A4) :duration 1/4}
+   {:pitch (note :F4) :duration 1/4}
+
+   {:pitch (note :G4) :duration 3/8}
+   {:pitch (note :F4) :duration 1/8}
+   {:pitch (note :G4) :duration 1/4}
+   {:pitch (note :A4) :duration 1/8}
+   {:pitch (note :G4) :duration 1/8}
+
+   {:pitch (note :F4) :duration 3/8}
+   {:pitch (note :D4) :duration 1/8}
+   {:pitch (note :D4) :duration 1/4}
    {:pitch (note :C4) :duration 1/4}
-   {:pitch (note :D4) :duration 1/2}
+
+   {:pitch (note :F4) :duration 3/4}
    ])
 
 (defn play
