@@ -83,43 +83,43 @@
    ])
 
 (def auld-lang-syne
-  [{:pitch (note :C4) :duration 1/4}
+  [{:pitch (note :C3) :duration 1/4}
 
-   {:pitch (note :F4) :duration 3/8}
-   {:pitch (note :F4) :duration 1/8}
-   {:pitch (note :F4) :duration 1/4}
-   {:pitch (note :A4) :duration 1/4}
+   {:pitch (note :F3) :duration 3/8}
+   {:pitch (note :F3) :duration 1/8}
+   {:pitch (note :F3) :duration 1/4}
+   {:pitch (note :A3) :duration 1/4}
 
-   {:pitch (note :G4) :duration 3/8}
-   {:pitch (note :F4) :duration 1/8}
-   {:pitch (note :G4) :duration 1/4}
-   {:pitch (note :A4) :duration 1/8}
-   {:pitch (note :G4) :duration 1/8}
+   {:pitch (note :G3) :duration 3/8}
+   {:pitch (note :F3) :duration 1/8}
+   {:pitch (note :G3) :duration 1/4}
+   {:pitch (note :A3) :duration 1/8}
+   {:pitch (note :G3) :duration 1/8}
 
-   {:pitch (note :F4) :duration 3/8}
-   {:pitch (note :F4) :duration 1/8}
-   {:pitch (note :A4) :duration 1/4}
-   {:pitch (note :C5) :duration 1/4}
-   {:pitch (note :D5) :duration 3/4}
-   {:pitch (note :D5) :duration 1/4}
-
-   {:pitch (note :C5) :duration 3/8}
-   {:pitch (note :A4) :duration 1/8}
-   {:pitch (note :A4) :duration 1/4}
-   {:pitch (note :F4) :duration 1/4}
-
-   {:pitch (note :G4) :duration 3/8}
-   {:pitch (note :F4) :duration 1/8}
-   {:pitch (note :G4) :duration 1/4}
-   {:pitch (note :A4) :duration 1/8}
-   {:pitch (note :G4) :duration 1/8}
-
-   {:pitch (note :F4) :duration 3/8}
-   {:pitch (note :D4) :duration 1/8}
-   {:pitch (note :D4) :duration 1/4}
+   {:pitch (note :F3) :duration 3/8}
+   {:pitch (note :F3) :duration 1/8}
+   {:pitch (note :A3) :duration 1/4}
    {:pitch (note :C4) :duration 1/4}
+   {:pitch (note :D4) :duration 3/4}
+   {:pitch (note :D4) :duration 1/4}
 
-   {:pitch (note :F4) :duration 3/4}
+   {:pitch (note :C4) :duration 3/8}
+   {:pitch (note :A3) :duration 1/8}
+   {:pitch (note :A3) :duration 1/4}
+   {:pitch (note :F3) :duration 1/4}
+
+   {:pitch (note :G3) :duration 3/8}
+   {:pitch (note :F3) :duration 1/8}
+   {:pitch (note :G3) :duration 1/4}
+   {:pitch (note :A3) :duration 1/8}
+   {:pitch (note :G3) :duration 1/8}
+
+   {:pitch (note :F3) :duration 3/8}
+   {:pitch (note :D3) :duration 1/8}
+   {:pitch (note :D3) :duration 1/4}
+   {:pitch (note :C3) :duration 1/4}
+
+   {:pitch (note :F3) :duration 3/4}
    ])
 
 (defn play
@@ -130,10 +130,12 @@
         decay (* (metro-tick nome) duration)]
     (when (some? pitch) (at (nome beat) (overtone.inst.synth/tb303
                             :note pitch
-                            :cutoff 1050
+                            :cutoff 2000
                             :decay (/ decay 1000)
-                            :wave 0
-                            :delay 0.65)))
+                            :wave 1
+                            :sustain 0.8
+                            :release 0.25
+                            :attack 0.1)))
     (apply-by (+ (nome (inc beat)) decay) #'play [nome (rest notes)])))
 
 (defn -main
