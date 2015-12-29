@@ -107,4 +107,11 @@
 
 (defn -main
   [& args]
-  (play (metronome 220) jingle-bells))
+  (let [path "./sounds/test.wav"]
+    (println "🎼 Recording to" path "now.")
+    (recording-start path)
+    (on-event ::finished-playing
+              (fn [event]
+                (when-let [recorded-to (recording-stop)]
+                  (println "Finished recording to" recorded-to "🎶"))) ::recording-complete-handle)
+    (play (metronome 120) auld-lang-syne)))
