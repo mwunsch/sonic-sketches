@@ -123,20 +123,26 @@
    ])
 
 (defn play
-  "Accepts a metronome, and a sequence of maps with :pitch and :duration"
+  "Accepts a metronome, and a sequence of maps with :pitch and :duration.
+  When the note sequence is empty, on the next beat
+  a ::finished-playing event is triggered"
   [nome notes]
-  (let [beat (nome)
-        {pitch :pitch duration :duration :as note} (first notes)
-        decay (* (metro-tick nome) duration)]
-    (when (some? pitch) (at (nome beat) (overtone.inst.synth/tb303
-                            :note pitch
-                            :cutoff 2000
-                            :decay (/ decay 1000)
-                            :wave 1
-                            :sustain 0.8
-                            :release 0.25
-                            :attack 0.1)))
-    (apply-by (+ (nome (inc beat)) decay) #'play [nome (rest notes)])))
+  (let [beat (nome)]
+    (if-let [note (first notes)]
+      (let [{pitch :pitch duration :duration} note
+            decay (* (metro-tick nome) duration)]
+        (when (some? pitch)
+          (at (nome beat)
+              (overtone.inst.synth/tb303
+               :note pitch
+               :cutoff 2000
+               :decay (/ decay 1000)
+               :wave 1
+               :sustain 0.8
+               :release 0.25
+               :attack 0.1)))
+        (apply-by (+ (nome (inc beat)) decay) #'play [nome (rest notes)]))
+      (apply-at (nome (inc beat)) #'event [::finished-playing {:metronome nome}]))))
 
 (defn -main
   [& args]
