@@ -45,43 +45,43 @@
    ])
 
 (def auld-lang-syne
-  [{:chord (note :C3) :duration 1/4}
+  [{:chord [(note :C3)] :duration 1/4}
 
-   {:chord (note :F3) :duration 3/8}
-   {:chord (note :F3) :duration 1/8}
-   {:chord (note :F3) :duration 1/4}
-   {:chord (note :A3) :duration 1/4}
+   {:chord [(note :F3)] :duration 3/8}
+   {:chord [(note :F3)] :duration 1/8}
+   {:chord [(note :F3)] :duration 1/4}
+   {:chord [(note :A3)] :duration 1/4}
 
-   {:chord (note :G3) :duration 3/8}
-   {:chord (note :F3) :duration 1/8}
-   {:chord (note :G3) :duration 1/4}
-   {:chord (note :A3) :duration 1/8}
-   {:chord (note :G3) :duration 1/8}
+   {:chord [(note :G3)] :duration 3/8}
+   {:chord [(note :F3)] :duration 1/8}
+   {:chord [(note :G3)] :duration 1/4}
+   {:chord [(note :A3)] :duration 1/8}
+   {:chord [(note :G3)] :duration 1/8}
 
-   {:chord (note :F3) :duration 3/8}
-   {:chord (note :F3) :duration 1/8}
-   {:chord (note :A3) :duration 1/4}
-   {:chord (note :C4) :duration 1/4}
-   {:chord (note :D4) :duration 3/4}
-   {:chord (note :D4) :duration 1/4}
+   {:chord [(note :F3)] :duration 3/8}
+   {:chord [(note :F3)] :duration 1/8}
+   {:chord [(note :A3)] :duration 1/4}
+   {:chord [(note :C4)] :duration 1/4}
+   {:chord [(note :D4)] :duration 3/4}
+   {:chord [(note :D4)] :duration 1/4}
 
-   {:chord (note :C4) :duration 3/8}
-   {:chord (note :A3) :duration 1/8}
-   {:chord (note :A3) :duration 1/4}
-   {:chord (note :F3) :duration 1/4}
+   {:chord [(note :C4)] :duration 3/8}
+   {:chord [(note :A3)] :duration 1/8}
+   {:chord [(note :A3)] :duration 1/4}
+   {:chord [(note :F3)] :duration 1/4}
 
-   {:chord (note :G3) :duration 3/8}
-   {:chord (note :F3) :duration 1/8}
-   {:chord (note :G3) :duration 1/4}
-   {:chord (note :A3) :duration 1/8}
-   {:chord (note :G3) :duration 1/8}
+   {:chord [(note :G3)] :duration 3/8}
+   {:chord [(note :F3)] :duration 1/8}
+   {:chord [(note :G3)] :duration 1/4}
+   {:chord [(note :A3)] :duration 1/8}
+   {:chord [(note :G3)] :duration 1/8}
 
-   {:chord (note :F3) :duration 3/8}
-   {:chord (note :D3) :duration 1/8}
-   {:chord (note :D3) :duration 1/4}
-   {:chord (note :C3) :duration 1/4}
+   {:chord [(note :F3)] :duration 3/8}
+   {:chord [(note :D3)] :duration 1/8}
+   {:chord [(note :D3)] :duration 1/4}
+   {:chord [(note :C3)] :duration 1/4}
 
-   {:chord (note :F3) :duration 3/4}
+   {:chord [(note :F3)] :duration 3/4}
    ])
 
 (defn play
@@ -94,10 +94,11 @@
       (let [{chord :chord duration :duration} note
             decay (* (metro-tick nome) duration)]
         (when (some? chord)
-          (at (nome beat)
-              (overtone.inst.piano/piano
-               :note chord
-               :decay (+ (/ decay 1000) 0.2))))
+          (doseq [pitch chord]
+            (at (nome beat)
+                (overtone.inst.piano/piano
+                 :note pitch
+                 :decay (+ (/ decay 1000) 0.2)))))
         (apply-by (+ (nome (inc beat)) decay) #'play [nome (rest notes)]))
       (apply-at (nome (inc beat)) #'event [::finished-playing {:metronome nome}]))))
 
