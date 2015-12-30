@@ -1,6 +1,7 @@
 (ns sonic-sketches.core
   (:use [overtone.live])
-  (:require [overtone.inst.synth])
+  (:require [overtone.inst.synth]
+            [overtone.inst.piano])
   (:gen-class))
 
 (def jingle-bells
@@ -44,64 +45,59 @@
    ])
 
 (def auld-lang-syne
-  [{:pitch (note :C3) :duration 1/4}
+  [{:chord (note :C3) :duration 1/4}
 
-   {:pitch (note :F3) :duration 3/8}
-   {:pitch (note :F3) :duration 1/8}
-   {:pitch (note :F3) :duration 1/4}
-   {:pitch (note :A3) :duration 1/4}
+   {:chord (note :F3) :duration 3/8}
+   {:chord (note :F3) :duration 1/8}
+   {:chord (note :F3) :duration 1/4}
+   {:chord (note :A3) :duration 1/4}
 
-   {:pitch (note :G3) :duration 3/8}
-   {:pitch (note :F3) :duration 1/8}
-   {:pitch (note :G3) :duration 1/4}
-   {:pitch (note :A3) :duration 1/8}
-   {:pitch (note :G3) :duration 1/8}
+   {:chord (note :G3) :duration 3/8}
+   {:chord (note :F3) :duration 1/8}
+   {:chord (note :G3) :duration 1/4}
+   {:chord (note :A3) :duration 1/8}
+   {:chord (note :G3) :duration 1/8}
 
-   {:pitch (note :F3) :duration 3/8}
-   {:pitch (note :F3) :duration 1/8}
-   {:pitch (note :A3) :duration 1/4}
-   {:pitch (note :C4) :duration 1/4}
-   {:pitch (note :D4) :duration 3/4}
-   {:pitch (note :D4) :duration 1/4}
+   {:chord (note :F3) :duration 3/8}
+   {:chord (note :F3) :duration 1/8}
+   {:chord (note :A3) :duration 1/4}
+   {:chord (note :C4) :duration 1/4}
+   {:chord (note :D4) :duration 3/4}
+   {:chord (note :D4) :duration 1/4}
 
-   {:pitch (note :C4) :duration 3/8}
-   {:pitch (note :A3) :duration 1/8}
-   {:pitch (note :A3) :duration 1/4}
-   {:pitch (note :F3) :duration 1/4}
+   {:chord (note :C4) :duration 3/8}
+   {:chord (note :A3) :duration 1/8}
+   {:chord (note :A3) :duration 1/4}
+   {:chord (note :F3) :duration 1/4}
 
-   {:pitch (note :G3) :duration 3/8}
-   {:pitch (note :F3) :duration 1/8}
-   {:pitch (note :G3) :duration 1/4}
-   {:pitch (note :A3) :duration 1/8}
-   {:pitch (note :G3) :duration 1/8}
+   {:chord (note :G3) :duration 3/8}
+   {:chord (note :F3) :duration 1/8}
+   {:chord (note :G3) :duration 1/4}
+   {:chord (note :A3) :duration 1/8}
+   {:chord (note :G3) :duration 1/8}
 
-   {:pitch (note :F3) :duration 3/8}
-   {:pitch (note :D3) :duration 1/8}
-   {:pitch (note :D3) :duration 1/4}
-   {:pitch (note :C3) :duration 1/4}
+   {:chord (note :F3) :duration 3/8}
+   {:chord (note :D3) :duration 1/8}
+   {:chord (note :D3) :duration 1/4}
+   {:chord (note :C3) :duration 1/4}
 
-   {:pitch (note :F3) :duration 3/4}
+   {:chord (note :F3) :duration 3/4}
    ])
 
 (defn play
-  "Accepts a metronome, and a sequence of maps with :pitch and :duration.
+  "Accepts a metronome, and a sequence of maps with :chord and :duration.
   When the note sequence is empty, on the next beat
   a ::finished-playing event is triggered"
   [nome notes]
   (let [beat (nome)]
     (if-let [note (first notes)]
-      (let [{pitch :pitch duration :duration} note
+      (let [{chord :chord duration :duration} note
             decay (* (metro-tick nome) duration)]
-        (when (some? pitch)
+        (when (some? chord)
           (at (nome beat)
-              (overtone.inst.synth/tb303
-               :note pitch
-               :cutoff 2000
-               :decay (/ decay 1000)
-               :wave 1
-               :sustain 0.8
-               :release 0.25
-               :attack 0.1)))
+              (overtone.inst.piano/piano
+               :note chord
+               :decay (+ (/ decay 1000) 0.2))))
         (apply-by (+ (nome (inc beat)) decay) #'play [nome (rest notes)]))
       (apply-at (nome (inc beat)) #'event [::finished-playing {:metronome nome}]))))
 
