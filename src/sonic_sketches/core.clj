@@ -1,48 +1,7 @@
 (ns sonic-sketches.core
   (:use [overtone.live])
-  (:require [overtone.inst.synth]
-            [overtone.inst.piano])
+  (:require [overtone.inst.piano])
   (:gen-class))
-
-(def jingle-bells
-  [{:pitch (note :E4) :duration 1/4}
-   {:pitch (note :E4) :duration 1/4}
-   {:pitch (note :E4) :duration 1/2}
-
-   {:pitch nil :duration 1/8}
-
-   {:pitch (note :E4) :duration 1/4}
-   {:pitch (note :E4) :duration 1/4}
-   {:pitch (note :E4) :duration 1/2}
-
-   {:pitch nil :duration 1/8}
-
-   {:pitch (note :E4) :duration 1/4}
-   {:pitch (note :G4) :duration 1/4}
-   {:pitch (note :C4) :duration 1/4}
-   {:pitch (note :D4) :duration 1/4}
-
-   {:pitch (note :E4) :duration 1}
-
-   {:pitch nil :duration 1/4}
-
-   {:pitch (note :F4) :duration 1/4}
-   {:pitch (note :F4) :duration 1/4}
-   {:pitch (note :F4) :duration 1/4}
-   {:pitch (note :F4) :duration 1/4}
-
-   {:pitch (note :F4) :duration 1/4}
-   {:pitch (note :E4) :duration 1/4}
-   {:pitch (note :E4) :duration 1/2}
-
-   {:pitch (note :E4) :duration 1/4}
-   {:pitch (note :D4) :duration 1/4}
-   {:pitch (note :D4) :duration 1/4}
-   {:pitch (note :E4) :duration 1/4}
-
-   {:pitch (note :D4) :duration 1/2}
-   {:pitch (note :G4) :duration 1/2}
-   ])
 
 (def auld-lang-syne
   [{:chord [(note :C3)] :duration 1/4}
