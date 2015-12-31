@@ -4,43 +4,44 @@
   (:gen-class))
 
 (def auld-lang-syne
-  [{:chord [(note :C3)] :duration 1/4}
+  [{:chord (chord :F3 :major) :duration 1/4}
 
-   {:chord [(note :F3)] :duration 3/8}
-   {:chord [(note :F3)] :duration 1/8}
-   {:chord [(note :F3)] :duration 1/4}
-   {:chord [(note :A3)] :duration 1/4}
+   {:chord (concat (chord :F3 :major) [(note :F4)]) :duration 3/8}
+   {:chord (concat (chord :F3 :major) [(note :F4)]) :duration 1/8}
+   {:chord (concat [(note :F3) (note :C4)] [(note :F4)]) :duration 1/4}
+   {:chord (concat [(note :F3) (note :A3)] [(note :F4) (note :A4)]) :duration 1/4}
 
-   {:chord [(note :G3)] :duration 3/8}
-   {:chord [(note :F3)] :duration 1/8}
-   {:chord [(note :G3)] :duration 1/4}
-   {:chord [(note :A3)] :duration 1/8}
-   {:chord [(note :G3)] :duration 1/8}
+   {:chord (concat [(note :C3)] (chord :C4 :major)) :duration 3/8}
+   {:chord (concat [(note :C3)] [(note :C4) (note :D4) (note :F4)]) :duration 1/8}
+   {:chord (concat [(note :C3)] (chord :C4 :major)) :duration 1/4}
+   {:chord (concat [(note :C3) (note :Bb3)] [(note :E4) (note :A4)]) :duration 1/4}
 
-   {:chord [(note :F3)] :duration 3/8}
-   {:chord [(note :F3)] :duration 1/8}
-   {:chord [(note :A3)] :duration 1/4}
-   {:chord [(note :C4)] :duration 1/4}
-   {:chord [(note :D4)] :duration 3/4}
-   {:chord [(note :D4)] :duration 1/4}
+   {:chord (concat (chord :F3 :major) [(note :F4)]) :duration 3/8}
+   {:chord (concat (chord :F3 :major) [(note :F4)]) :duration 1/8}
+   {:chord (concat [(note :F3) (note :C4)] [(note :F4) (note :A4)]) :duration 1/4}
+   {:chord (concat [(note :F3) (note :A3)] [(note :F4) (note :C5)]) :duration 1/4}
 
-   {:chord [(note :C4)] :duration 3/8}
-   {:chord [(note :A3)] :duration 1/8}
-   {:chord [(note :A3)] :duration 1/4}
-   {:chord [(note :F3)] :duration 1/4}
+   {:chord (concat [(note :Bb2)] [(note :Bb3) (note :F4) (note :D4)]) :duration 3/4}
+   {:chord nil :duration 1/8}
 
-   {:chord [(note :G3)] :duration 3/8}
-   {:chord [(note :F3)] :duration 1/8}
-   {:chord [(note :G3)] :duration 1/4}
-   {:chord [(note :A3)] :duration 1/8}
-   {:chord [(note :G3)] :duration 1/8}
+   {:chord (concat [(note :Bb2)] [(note :Bb3) (note :F4) (note :D4)]) :duration 1/4}
 
-   {:chord [(note :F3)] :duration 3/8}
-   {:chord [(note :D3)] :duration 1/8}
-   {:chord [(note :D3)] :duration 1/4}
-   {:chord [(note :C3)] :duration 1/4}
+   {:chord (concat [(note :F3) (note :A3)] [(note :F4) (note :C5)]) :duration 3/8}
+   {:chord (concat [(note :F3) (note :C4)] [(note :F4) (note :A4)]) :duration 1/8}
+   {:chord (concat [(note :F3) (note :C4)] [(note :F4) (note :A4)]) :duration 1/4}
+   {:chord (concat (chord :F3 :major) [(note :F4)]) :duration 1/4}
 
-   {:chord [(note :F3)] :duration 3/4}
+   {:chord (concat [(note :C3)] (chord :C4 :major)) :duration 3/8}
+   {:chord (concat [(note :C3)] [(note :C4) (note :D4) (note :F4)]) :duration 1/8}
+   {:chord (concat [(note :C3)] (chord :C4 :major)) :duration 1/4}
+   {:chord (concat [(note :C3) (note :Bb3)] [(note :E4) (note :A4)]) :duration 1/4}
+
+   {:chord (concat [(note :F3) (note :C4)] [(note :Bb3) (note :F4)]) :duration 3/8}
+   {:chord (concat [(note :F3) (note :C4)] [(note :D4)]) :duration 1/8}
+   {:chord (concat [(note :F3) (note :A3)] [(note :D4)]) :duration 1/4}
+   {:chord (chord :F3 :major) :duration 1/4}
+
+   {:chord (concat (chord :F3 :major) [(note :F4)]) :duration 3/4}
    ])
 
 (defn play
