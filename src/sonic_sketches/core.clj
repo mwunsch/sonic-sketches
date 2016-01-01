@@ -56,7 +56,7 @@
           (doseq [pitch chord]
             (at t (overtone.inst.piano/piano
                     :note pitch
-                    :decay 0.45))))
+                    :decay 0.25))))
         (apply-at (+ t decay) #'play [nome (rest notes)]))
       (apply-at (+ t (metro-tick nome)) #'event [::finished-playing {:metronome nome}]))))
 
@@ -69,4 +69,4 @@
               (fn [event]
                 (when-let [recorded-to (recording-stop)]
                   (println "Finished recording to" recorded-to "🎶"))) ::recording-complete-handle)
-    (play (metronome 120) auld-lang-syne)))
+    (play (metronome 96) auld-lang-syne)))
