@@ -43,10 +43,10 @@
    ])
 
 (defn play
-  "Accepts a metronome, and a sequence of maps with :chord and :duration.
-  When the note sequence is empty, on the next beat
-  a ::finished-playing event is triggered"
-  [nome notes]
+  "Accepts a metronome, a sequence of maps with :chord and :duration.
+  and a promise that will be delivered once the sequence has been played.
+  The value of the promise will be the metronome"
+  [nome notes did-complete]
   (let [t (now)
         beat (nome)]
     (if-let [note (first notes)]
@@ -57,16 +57,16 @@
             (at t (overtone.inst.piano/piano
                     :note pitch
                     :decay 0.25))))
-        (apply-at (+ t decay) #'play [nome (rest notes)]))
-      (apply-at (+ t (metro-tick nome)) #'event [::finished-playing {:metronome nome}]))))
+        (apply-at (+ t decay) #'play [nome (rest notes) did-complete]))
+      (apply-at (+ t (metro-tick nome)) #'deliver [did-complete nome]))))
 
 (defn -main
   [& args]
-  (let [path "./sounds/test.wav"]
+  (let [path "./sounds/test.wav"
+        will-complete (promise)]
     (println "🎼 Recording to" path "now.")
     (recording-start path)
-    (on-event ::finished-playing
-              (fn [event]
-                (when-let [recorded-to (recording-stop)]
-                  (println "Finished recording to" recorded-to "🎶"))) ::recording-complete-handle)
-    (play (metronome 96) auld-lang-syne)))
+    (play (metronome 120) auld-lang-syne will-complete)
+    (when-let [nome @will-complete]
+      (let [recorded-to (recording-stop)]
+        (println "Finished recording to" recorded-to "🎶")))))
