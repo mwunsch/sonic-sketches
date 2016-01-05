@@ -43,30 +43,35 @@
    ])
 
 (defn play
-  "Accepts a metronome, a sequence of maps with :chord and :duration.
-  and a promise that will be delivered once the sequence has been played.
-  The value of the promise will be the metronome"
-  [nome notes did-complete]
-  (let [t (now)
-        beat (nome)]
-    (if-let [note (first notes)]
-      (let [{chord :chord duration :duration} note
-            decay (* (metro-tick nome) duration)]
-        (when (some? chord)
-          (doseq [pitch chord]
-            (at t (overtone.inst.piano/piano
+  "Accepts a metronome and a sequence of notes with a :chord
+  and :duration. Optionally, accepts a third parameter: a promise that
+  will be delivered once the sequence of notes has been played. This
+  option is used internally for temporal recursion."
+  ([nome notes]
+   (let [will-complete (promise)]
+     (play nome notes will-complete)
+     will-complete))
+  ([nome notes completion-promise]
+   (let [t (now)
+         beat (nome)]
+     (if-let [note (first notes)]
+       (let [{chord :chord duration :duration} note
+             decay (* (metro-tick nome) duration)]
+         (when (some? chord)
+           (doseq [pitch chord]
+             (at t (overtone.inst.piano/piano
                     :note pitch
                     :decay 0.25))))
-        (apply-at (+ t decay) #'play [nome (rest notes) did-complete]))
-      (apply-at (+ t (metro-tick nome)) #'deliver [did-complete nome]))))
+         (apply-at (+ t decay) #'play
+                   [nome (rest notes) completion-promise]))
+       (apply-at (+ t (metro-tick nome)) #'deliver [completion-promise nome])))))
 
 (defn -main
   [& args]
-  (let [path "./sounds/test.wav"
-        will-complete (promise)]
+  (let [path "./sounds/test.wav"]
     (println "🎼 Recording to" path "now.")
     (recording-start path)
-    (play (metronome 120) auld-lang-syne will-complete)
-    (when-let [nome @will-complete]
-      (let [recorded-to (recording-stop)]
-        (println "Finished recording to" recorded-to "🎶")))))
+    (let [will-complete (play (metronome 120) auld-lang-syne)]
+      (when-let [nome @will-complete]
+        (let [recorded-to (recording-stop)]
+          (println "Finished recording to" recorded-to "🎶"))))))
