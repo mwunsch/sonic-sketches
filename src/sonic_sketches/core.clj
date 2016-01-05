@@ -57,11 +57,10 @@
      (if-let [note (first notes)]
        (let [{chord :chord duration :duration} note
              decay (* (metro-tick nome) duration)]
-         (when (some? chord)
-           (doseq [pitch chord]
-             (at t (overtone.inst.piano/piano
-                    :note pitch
-                    :decay 0.25))))
+         (doseq [pitch chord]
+           (at t (overtone.inst.piano/piano
+                  :note pitch
+                  :decay 0.25)))
          (apply-at (+ t decay) #'play
                    [nome (rest notes) completion-promise]))
        (apply-at (+ t (metro-tick nome)) #'deliver [completion-promise nome])))))
