@@ -1,6 +1,7 @@
 (ns sonic-sketches.core
   (:use [overtone.live])
-  (:require [overtone.inst.piano])
+  (:require [overtone.inst.piano]
+            [clojure.core.async :as async])
   (:gen-class))
 
 (def auld-lang-syne
