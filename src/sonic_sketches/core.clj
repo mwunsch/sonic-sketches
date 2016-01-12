@@ -45,14 +45,16 @@
 
 (defn play
   "Accepts a metronome and a sequence of notes with a :chord
-  and :duration. Optionally, accepts a third parameter: a promise that
-  will be delivered once the sequence of notes has been played. This
-  option is used internally for temporal recursion."
+  and :duration. Returns a core.async channel that, when read, will
+  block until the song has completed and returns the metronome.
+
+  In its 3-arity form accepts a channel as a third parameter and will
+  issue a write when the song is completed. Used internally."
   ([nome notes]
-   (let [will-complete (promise)]
-     (play nome notes will-complete)
-     will-complete))
-  ([nome notes completion-promise]
+   (let [channel (async/chan)]
+     (async/go (play nome notes channel))
+     (async/go (async/<! channel))))
+  ([nome notes channel]
    (let [t (now)
          beat (nome)]
      (if-let [note (first notes)]
@@ -63,15 +65,14 @@
                   :note pitch
                   :decay 0.25)))
          (apply-at (+ t decay) #'play
-                   [nome (rest notes) completion-promise]))
-       (apply-at (+ t (metro-tick nome)) #'deliver [completion-promise nome])))))
+                   [nome (rest notes) channel]))
+       (apply-at (+ t (metro-tick nome)) async/>!! [channel nome])))))
 
 (defn -main
   [& args]
   (let [path "./sounds/test.wav"]
     (println "🎼 Recording to" path "now.")
     (recording-start path)
-    (let [will-complete (play (metronome 120) auld-lang-syne)]
-      (when-let [nome @will-complete]
-        (let [recorded-to (recording-stop)]
-          (println "Finished recording to" recorded-to "🎶"))))))
+    (let [nome (async/<!! (play (metronome 120) auld-lang-syne))]
+      (let [recorded-to (recording-stop)]
+        (println "Finished recording to" recorded-to "🎶")))))
