@@ -51,9 +51,10 @@
   In its 3-arity form accepts a channel as a third parameter and will
   issue a write when the song is completed. Used internally."
   ([nome notes]
-   (let [channel (async/chan)]
-     (async/go (play nome notes channel))
-     (async/go (async/<! channel))))
+   (async/go (async/<! (let [channel (async/chan)]
+                         (play nome notes channel)
+                         channel))))
+
   ([nome notes channel]
    (let [t (now)
          beat (nome)]
@@ -73,6 +74,6 @@
   (let [path "./sounds/test.wav"]
     (println "🎼 Recording to" path "now.")
     (recording-start path)
-    (let [nome (async/<!! (play (metronome 120) auld-lang-syne))]
-      (let [recorded-to (recording-stop)]
-        (println "Finished recording to" recorded-to "🎶")))))
+    (async/<!! (play (metronome 120) auld-lang-syne))
+    (let [recorded-to (recording-stop)]
+      (println "Finished recording to" recorded-to "🎶"))))
