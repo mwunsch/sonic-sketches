@@ -69,12 +69,18 @@
                    [nome (rest notes) channel]))
        (apply-at (+ t (metro-tick nome)) async/>!! [channel nome])))))
 
+(defmacro make-recording
+  [path out]
+  `(do
+     (println "🎼 Recording to" ~path "now.")
+     (recording-start ~path)
+     (async/<!! ~out)
+     (let [recorded# (recording-stop)]
+       (println "Finished recording to" recorded# "🎶")
+       recorded#)))
+
 (defn -main
   [& args]
   (let [tempfile (java.io.File/createTempFile "test" ".wav")
         path (.getPath tempfile)]
-    (println "🎼 Recording to" path "now.")
-    (recording-start path)
-    (async/<!! (play (metronome 120) auld-lang-syne))
-    (let [recorded-to (recording-stop)]
-      (println "Finished recording to" recorded-to "🎶"))))
+    (make-recording path (play (metronome 120) auld-lang-syne))))
