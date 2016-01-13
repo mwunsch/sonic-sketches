@@ -71,7 +71,8 @@
 
 (defn -main
   [& args]
-  (let [path "./sounds/test.wav"]
+  (let [tempfile (java.io.File/createTempFile "test" ".wav")
+        path (.getPath tempfile)]
     (println "🎼 Recording to" path "now.")
     (recording-start path)
     (async/<!! (play (metronome 120) auld-lang-syne))
