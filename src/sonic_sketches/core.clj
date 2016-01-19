@@ -82,6 +82,12 @@
 
 (defn -main
   [& args]
-  (let [tempfile (java.io.File/createTempFile "test" ".wav")
-        path (.getPath tempfile)]
-    (make-recording path (play (metronome 120) auld-lang-syne))))
+  (let [aws-credentials {:profile "sonic-sketch"}
+        tempfile (java.io.File/createTempFile "test" ".wav")
+        path (.getPath tempfile)
+        recorded-path (make-recording path (play (metronome 120) auld-lang-syne))
+        recording (java.io.File. recorded-path)]
+    (s3/put-object aws-credentials
+                   :bucket-name "sonic-sketches"
+                   :key (.getName recording)
+                   :file recording)))
