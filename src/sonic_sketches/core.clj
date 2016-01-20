@@ -80,14 +80,22 @@
        (println "Finished recording to" recorded# "🎶")
        recorded#)))
 
+(defn upload-to-s3
+  "Upload a file at path to s3"
+  [path]
+  (let [credentials {:profile "sonic-sketch"}
+        recording (java.io.File. path)
+        key-name (.getName recording)]
+    (println "Uploading" key-name "to S3")
+    (s3/put-object credentials
+                   :bucket-name "sonic-sketches"
+                   :key key-name
+                   :file recording)))
+
 (defn -main
   [& args]
   (let [aws-credentials {:profile "sonic-sketch"}
         tempfile (java.io.File/createTempFile "test" ".wav")
-        path (.getPath tempfile)
-        recorded-path (make-recording path (play (metronome 120) auld-lang-syne))
-        recording (java.io.File. recorded-path)]
-    (s3/put-object aws-credentials
-                   :bucket-name "sonic-sketches"
-                   :key (.getName recording)
-                   :file recording)))
+        path (.getPath tempfile)]
+    (-> (make-recording path (play (metronome 120) auld-lang-syne))
+        upload-to-s3)))
