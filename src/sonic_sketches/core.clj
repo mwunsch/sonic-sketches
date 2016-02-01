@@ -1,6 +1,7 @@
 (ns sonic-sketches.core
   (:use [overtone.live])
   (:require [overtone.inst.piano]
+            [overtone.inst.synth :refer [tb303]]
             [clojure.core.async :as async]
             [amazonica.aws.s3 :as s3])
   (:gen-class))
