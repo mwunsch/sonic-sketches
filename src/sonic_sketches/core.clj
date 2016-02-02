@@ -1,6 +1,7 @@
 (ns sonic-sketches.core
   (:use [overtone.live])
   (:require [overtone.inst.piano]
+            [overtone.inst.drum :as drums]
             [overtone.inst.synth :refer [tb303]]
             [clojure.core.async :as async]
             [amazonica.aws.s3 :as s3])
@@ -44,6 +45,26 @@
 
    {:chord (concat (chord :F3 :major) [(note :F4)]) :duration 3}
    ])
+
+(defn sequencer
+  "Accepts a metronome, an instrument, and a vector of 0's or 1's. If
+  the pulse is 1, the instrument will play. To be used something like:
+
+      (let [instruments [drums/kick drums/snare]]
+        (dotimes [n (count instruments)]
+          (sequencer (metronome 120) (get instruments n) (repeatedly 8 #(choose [0 1])))))
+
+  Or something of that nature."
+  [nome instrument pulses]
+  (let [t (now)
+        beat (nome)
+        tick (metro-tick nome)]
+    (if-let [pulse (first pulses)]
+      (do
+        (when (pos? pulse)
+          (at t (instrument)))
+        (apply-at (+ t tick) #'sequencer [nome instrument (rest pulses)]))
+      nome)))
 
 (defn play
   "Accepts a metronome and a sequence of notes with a :chord
