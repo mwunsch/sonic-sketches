@@ -50,9 +50,9 @@
   "Accepts a metronome, an instrument, and a vector of 0's or 1's. If
   the pulse is 1, the instrument will play. To be used something like:
 
-      (let [instruments [drums/kick drums/snare]]
-        (dotimes [n (count instruments)]
-          (sequencer (metronome 120) (get instruments n) (repeatedly 8 #(choose [0 1])))))
+  (let [nome (metronome 120)
+        drumkit [drums/kick drums/snare drums/hat3]]
+    (doseq [drum drumkit] (sequencer nome drum (repeatedly 8 #(choose [0 1])))))
 
   Or something of that nature."
   [nome instrument pulses]
