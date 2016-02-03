@@ -66,8 +66,7 @@
 
 (defn -main
   [& args]
-  (let [aws-credentials {:profile "sonic-sketch"}
-        tempfile (java.io.File/createTempFile "test" ".wav")
+  (let [tempfile (java.io.File/createTempFile "test" ".wav")
         path (.getPath tempfile)
         percussion [drums/kick drums/snare drums/tom drums/hat3]
         drumsequence (map vector percussion (partition 8 (repeatedly #(choose [0 1]))))
