@@ -55,16 +55,32 @@
     (doseq [drum drumkit] (sequencer nome drum (repeatedly 8 #(choose [0 1])))))
 
   Or something of that nature."
-  [nome instrument pulses]
-  (let [t (now)
-        beat (nome)
-        tick (metro-tick nome)]
-    (if-let [pulse (first pulses)]
-      (do
-        (when (pos? pulse)
-          (at t (instrument)))
-        (apply-at (+ t tick) #'sequencer [nome instrument (rest pulses)]))
-      nome)))
+  ([nome instrument pulses]
+   (let [channel (async/chan)]
+     (sequencer nome instrument pulses channel)
+     channel))
+
+  ([nome instrument pulses channel]
+   (let [beat (nome)]
+     (if-let [pulse (first pulses)]
+       (do
+         (when (pos? pulse)
+           (at (nome beat) (instrument)))
+         (apply-by (nome (inc beat)) #'sequencer [nome instrument (rest pulses) channel]))
+       (apply-at (nome (inc beat)) async/>!! [channel [nome (:name instrument)]])))))
+
+(defn multisequence
+  "Accepts a metronome and a vector of instructions. Each instruction
+  is a pair of instruments and a sequence of 0's or 1's. Returns an
+  async channel that will be blocked until the first sequence
+  completes. eg.
+
+  (let [nome (metronome 120)
+        instruments [drums/kick drums/snare drums/tom]]
+    (multisequence nome (map vector instruments (partition 8 (repeatedly #(choose [0 1]))))))"
+  [nome instructions]
+  (async/go (async/alts! (vec (for [[instrument pulses] instructions]
+                                (sequencer nome instrument pulses))))))
 
 (defn play
   "Accepts a metronome and a sequence of notes with a :chord
