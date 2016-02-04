@@ -57,6 +57,12 @@
   (for [drum drumsequences]
     (update-in drum [1] #(flatten (repeat n %)))))
 
+(defn cycle-sequence
+  "Loop the drum pattern sequence infinitely."
+  [drumsequences]
+  (for [drum drumsequences]
+    (update-in drum [1] cycle)))
+
 (def four-on-the-floor
   [[drums/kick       [1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0]]
    [drums/clap       [0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0]]
