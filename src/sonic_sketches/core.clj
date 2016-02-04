@@ -3,6 +3,7 @@
   (:require [overtone.inst.drum :as drums]
             [overtone.inst.synth :refer [tb303]]
             [clojure.core.async :as async]
+            [clojure.data.generators :as datagen]
             [amazonica.aws.s3 :as s3])
   (:gen-class))
 
@@ -46,10 +47,10 @@
   to generate. Defaults to 16 steps."
   ([percussion] (rand-drumsequence percussion 16))
   ([percussion nsteps]
-   (->> #(choose [0 1])
+   (->> #(datagen/rand-nth [0 1])
         repeatedly
         (partition nsteps)
-        (map vector percussion))))
+        (mapv vector percussion))))
 
 (defn loop-sequence
   "Loop each drum in a drumsequence n times."
