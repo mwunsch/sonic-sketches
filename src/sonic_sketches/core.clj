@@ -6,8 +6,8 @@
             [amazonica.aws.s3 :as s3])
   (:gen-class))
 
-(defn sequencer
-  "Accepts a metronome, an instrument, and a vector of 0's or 1's. If
+(defn step-sequencer
+  "Accepts a metronome, an instrument, and a seq of 0's or 1's. If
   the pulse is 1, the instrument will play. To be used something like:
 
   (let [nome (metronome 120)
@@ -17,30 +17,50 @@
   Or something of that nature."
   ([nome instrument pulses]
    (let [channel (async/chan)]
-     (sequencer nome instrument pulses channel)
+     (step-sequencer nome instrument pulses channel)
      channel))
 
   ([nome instrument pulses channel]
-   (let [beat (nome)]
+   (let [t (now)
+         tick (metro-tick nome)
+         drum (:name instrument)]
      (if-let [pulse (first pulses)]
        (do
          (when (pos? pulse)
-           (at (nome beat) (instrument)))
-         (apply-by (nome (inc beat)) #'sequencer [nome instrument (rest pulses) channel]))
-       (apply-at (nome (inc beat)) async/>!! [channel [nome (:name instrument)]])))))
+           (at t (instrument)))
+         (apply-at (+ t tick) #'step-sequencer [nome instrument (rest pulses) channel]))
+       (apply-at (+ t tick) async/>!! [channel [nome drum]])))))
 
-(defn multisequence
+(defn drummachine
   "Accepts a metronome and a vector of instructions. Each instruction
-  is a pair of instruments and a sequence of 0's or 1's. Returns an
-  async channel that will be blocked until the first sequence
-  completes. eg.
-
-  (let [nome (metronome 120)
-        instruments [drums/kick drums/snare drums/tom]]
-    (multisequence nome (map vector instruments (partition 8 (repeatedly #(choose [0 1]))))))"
+  is a pair of instruments and a sequence of 0's or 1's. Returns a seq
+  of async channels suitable for use with `alts!!`"
   [nome instructions]
-  (async/go (async/alts! (vec (for [[instrument pulses] instructions]
-                                (sequencer nome instrument pulses))))))
+  (for [[instrument pulses] instructions]
+    (async/go (async/<! (step-sequencer nome instrument pulses)))))
+
+(defn rand-drumsequence
+  "Randomly generates a drum sequence for each percussion
+  instrument. Accepts a vector of instruments and the number of steps
+  to generate. Defaults to 16 steps."
+  ([percussion] (rand-drumsequence percussion 16))
+  ([percussion nsteps]
+   (->> #(choose [0 1])
+        repeatedly
+        (partition nsteps)
+        (map vector percussion))))
+
+(defn loop-sequence
+  "Loop each drum in a drumsequence n times."
+  [drumsequences n]
+  (for [drum drumsequences]
+    (update-in drum [1] #(flatten (repeat n %)))))
+
+(def four-on-the-floor
+  [[drums/kick       [1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0]]
+   [drums/snare      [0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0]]
+   [drums/open-hat   [0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0]]
+   [drums/closed-hat [1 1 0 1 1 1 0 1 1 1 0 1 1 1 0 1]]])
 
 (defmacro make-recording
   [path out]
@@ -68,8 +88,8 @@
   [& args]
   (let [tempfile (java.io.File/createTempFile "test" ".wav")
         path (.getPath tempfile)
-        percussion [drums/kick drums/snare drums/tom drums/hat3]
-        drumsequence (map vector percussion (partition 8 (repeatedly #(choose [0 1]))))
-        nome (metronome 120)]
-    (-> (make-recording path (multisequence nome drumsequence))
+        percussion [drums/kick drums/snare drums/tom drums/closed-hat drums/open-hat]
+        nome (metronome 200)
+        drumsequence (rand-drumsequence percussion)]
+    (-> (make-recording path (async/go (async/alts! (drummachine nome drumsequence))))
         upload-to-s3)))
