@@ -23,12 +23,13 @@
   ([nome instrument pulses channel]
    (let [t (now)
          tick (metro-tick nome)
+         bars (metro-bpb nome)
          drum (:name instrument)]
      (if-let [pulse (first pulses)]
        (do
          (when (pos? pulse)
            (at t (instrument)))
-         (apply-at (+ t tick) #'step-sequencer [nome instrument (rest pulses) channel]))
+         (apply-at (+ t (/ tick bars)) #'step-sequencer [nome instrument (rest pulses) channel]))
        (apply-at (+ t tick) async/>!! [channel [nome drum]])))))
 
 (defn drummachine
@@ -58,9 +59,8 @@
 
 (def four-on-the-floor
   [[drums/kick       [1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0]]
-   [drums/snare      [0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0]]
-   [drums/open-hat   [0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0]]
-   [drums/closed-hat [1 1 0 1 1 1 0 1 1 1 0 1 1 1 0 1]]])
+   [drums/clap       [0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0]]
+   [drums/closed-hat [0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0]]])
 
 (defmacro make-recording
   [path out]
