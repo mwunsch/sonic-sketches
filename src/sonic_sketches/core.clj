@@ -79,6 +79,13 @@
    :vivace (range 168 176)
    :presto (range 168 200)})
 
+(defn rand-metronome
+  "Given a tempo, choose a random BPM."
+  [tempo]
+  (->> (tempo tempo-map)
+       datagen/rand-nth
+       metronome))
+
 (defmacro make-recording
   [path out]
   `(do
