@@ -95,8 +95,11 @@
   [& args]
   (let [tempfile (java.io.File/createTempFile "test" ".wav")
         path (.getPath tempfile)
-        percussion [drums/kick drums/snare drums/tom drums/closed-hat drums/open-hat]
-        nome (metronome 200)
-        drumsequence (rand-drumsequence percussion)]
-    (-> (make-recording path (async/go (async/alts! (drummachine nome drumsequence))))
-        upload-to-s3)))
+        seed (now)]
+    (binding [datagen/*rnd* (java.util.Random. seed)]
+      (let [percussion [drums/kick drums/snare drums/tom drums/closed-hat drums/open-hat]
+            nome (metronome 86)
+            drumsequence (rand-drumsequence percussion)]
+        (println "RNG Seed:" seed)
+        (-> (make-recording path (async/go (async/alts! (drummachine nome drumsequence))))
+            upload-to-s3)))))
