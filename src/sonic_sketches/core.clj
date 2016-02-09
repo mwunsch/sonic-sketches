@@ -79,6 +79,14 @@
    :vivace (range 168 176)
    :presto (range 168 200)})
 
+(def percussion
+  "A list of all possible drums"
+  (->> 'drums
+       (get (ns-aliases *ns*))
+       ns-publics
+       vals
+       (map var-get)))
+
 (defn rand-metronome
   "Given a tempo, choose a random BPM."
   [tempo]
@@ -114,9 +122,9 @@
         path (.getPath tempfile)
         seed (now)]
     (binding [datagen/*rnd* (java.util.Random. seed)]
-      (let [percussion [drums/kick drums/snare drums/tom drums/closed-hat drums/open-hat]
-            nome (metronome 86)
-            drumsequence (rand-drumsequence percussion)]
+      (let [drums (datagen/reservoir-sample 6 percussion) ; 6 seems like a good number
+            nome (rand-metronome :andante)
+            drumsequence (rand-drumsequence drums)]
         (println "RNG Seed:" seed)
         (-> (make-recording path (async/go (async/alts! (drummachine nome drumsequence))))
             upload-to-s3)))))
