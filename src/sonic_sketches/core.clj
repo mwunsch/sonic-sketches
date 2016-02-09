@@ -72,12 +72,12 @@
 (def tempo-map
   "The values represent ranges of BPM. See:
   https://en.wikipedia.org/wiki/Tempo#Italian_tempo_markings"
-  {:adagio (range 66 76)
-   :andante (range 76 108)
+  {:adagio   (range 66 76)
+   :andante  (range 76 108)
    :moderato (range 108 120)
-   :allegro (range 120 168)
-   :vivace (range 168 176)
-   :presto (range 168 200)})
+   :allegro  (range 120 168)
+   :vivace   (range 168 176)
+   :presto   (range 168 200)})
 
 (def percussion
   "A list of all possible drums"
