@@ -106,7 +106,7 @@
 
 (defn upload-to-s3
   "Upload a file at path to s3"
-  [path]
+  [path & metadata]
   (let [credentials {:profile "sonic-sketch"}
         recording (java.io.File. path)
         key-name (.getName recording)]
@@ -114,7 +114,8 @@
     (s3/put-object credentials
                    :bucket-name "sonic-sketches"
                    :key key-name
-                   :file recording)))
+                   :file recording
+                   :metadata {:user-metadata (apply hash-map metadata)})))
 
 (defn -main
   [& args]
@@ -127,4 +128,4 @@
             drumsequence (rand-drumsequence drums)]
         (println "RNG Seed:" seed)
         (-> (make-recording path (async/go (async/alts! (drummachine nome drumsequence))))
-            upload-to-s3)))))
+            (upload-to-s3 :rng-seed seed :bpm (metro-bpm nome)))))))
