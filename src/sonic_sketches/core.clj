@@ -127,7 +127,7 @@
             nome (rand-metronome :andante)
             drumsequence (-> (rand-drumsequence drums)
                              (loop-sequence 8))]
-        (println "RNG Seed:" seed)
+        (println "🎲 RNG Seed:" seed)
         (-> (make-recording path
                             (async/go (async/alts! (drummachine nome drumsequence))))
             (upload-to-s3 :rng-seed seed
