@@ -125,7 +125,10 @@
     (binding [datagen/*rnd* (java.util.Random. seed)]
       (let [drums (datagen/reservoir-sample 6 percussion) ; 6 seems like a good number
             nome (rand-metronome :andante)
-            drumsequence (rand-drumsequence drums)]
+            drumsequence (-> (rand-drumsequence drums)
+                             (loop-sequence 8))]
         (println "RNG Seed:" seed)
-        (-> (make-recording path (async/go (async/alts! (drummachine nome drumsequence))))
-            (upload-to-s3 :rng-seed seed :bpm (metro-bpm nome)))))))
+        (-> (make-recording path
+                            (async/go (async/alts! (drummachine nome drumsequence))))
+            (upload-to-s3 :rng-seed seed
+                          :bpm (metro-bpm nome)))))))
