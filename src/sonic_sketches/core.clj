@@ -33,6 +33,20 @@
          (apply-at (+ t (/ tick bars)) #'step-sequencer [nome instrument (rest pulses) channel]))
        (apply-at (+ t tick) async/>!! [channel [nome drum]])))))
 
+(defn note-sequencer
+  "Similar to the step-sequencer, except the sequence should be a
+  vector of key, value pairs to be applied to the instrument"
+  [nome instrument pulses]
+  (let [t (now)
+        tick (metro-tick nome)
+        bars (metro-bpb nome)]
+    (if-let [pulse (first pulses)]
+      (do
+        (when (some? pulse)
+          (at t (apply instrument pulse)))
+        (apply-at (+ t (/ tick bars)) #'note-sequencer [nome instrument (rest pulses)]))
+      (apply-at (+ t tick) println ["All finished"]))))
+
 (defn drummachine
   "Accepts a metronome and a vector of instructions. Each instruction
   is a pair of instruments and a sequence of 0's or 1's. Returns a seq
