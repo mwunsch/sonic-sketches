@@ -55,6 +55,12 @@
   (for [[instrument pulses] instructions]
     (async/go (async/<! (step-sequencer nome instrument pulses)))))
 
+(defn rand-notesequence
+  "Produce a n notes from given scale randomly. Returns a vector
+  suitable for application to a tb303."
+  [n scale]
+  (mapv (partial vector :note) (repeatedly n #(datagen/rand-nth scale))))
+
 (defn rand-drumsequence
   "Randomly generates a drum sequence for each percussion
   instrument. Accepts a vector of instruments and the number of steps
