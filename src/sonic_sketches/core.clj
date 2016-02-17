@@ -7,46 +7,6 @@
             [amazonica.aws.s3 :as s3])
   (:gen-class))
 
-(defn step-sequencer
-  "Accepts a metronome, an instrument, and a seq of 0's or 1's. If
-  the pulse is 1, the instrument will play. To be used something like:
-
-  (let [nome (metronome 120)
-        drumkit [drums/kick drums/snare drums/hat3]]
-    (doseq [drum drumkit] (sequencer nome drum (repeatedly 8 #(choose [0 1])))))
-
-  Or something of that nature."
-  ([nome instrument pulses]
-   (let [channel (async/chan)]
-     (step-sequencer nome instrument pulses channel)
-     channel))
-
-  ([nome instrument pulses channel]
-   (let [t (now)
-         tick (metro-tick nome)
-         bars (metro-bpb nome)
-         drum (:name instrument)]
-     (if-let [pulse (first pulses)]
-       (do
-         (when (pos? pulse)
-           (at t (instrument)))
-         (apply-at (+ t (/ tick bars)) #'step-sequencer [nome instrument (rest pulses) channel]))
-       (apply-at (+ t tick) async/>!! [channel [nome drum]])))))
-
-(defn note-sequencer
-  "Similar to the step-sequencer, except the sequence should be a
-  vector of key, value pairs to be applied to the instrument"
-  [nome instrument pulses]
-  (let [t (now)
-        tick (metro-tick nome)
-        bars (metro-bpb nome)]
-    (if-let [pulse (first pulses)]
-      (do
-        (when (some? pulse)
-          (at t (apply instrument pulse)))
-        (apply-at (+ t (/ tick bars)) #'note-sequencer [nome instrument (rest pulses)]))
-      (apply-at (+ t tick) println ["All finished"]))))
-
 (defn play-sequence
   "Abstracting the notion of playing through a sequence, this fn takes
   a clock (a metronome), an input channel, and a lambda. It takes
@@ -72,6 +32,32 @@
          (async/<! (async/timeout tick))
          (recur (metro-tick clock)))
        clock))))
+
+(defn step-sequencer
+  "Accepts a metronome, an instrument, and a seq of 0's or 1's. If the
+  pulse is 1, the instrument will play. The sequence will be treated
+  as if each step is a fraction of a beat, the denominator being the
+  number of beats in a bar as determined by the metronome."
+  [nome instrument pulses]
+  (let [bpb (metro-bpb nome)
+        bpm (metro-bpm nome)
+        clock (metronome (* bpm bpb))]
+    (play-sequence clock
+                   (async/to-chan pulses)
+                   (fn [x] (instrument))
+                   pos?)))
+
+(defn note-sequencer
+  "Similar to the step-sequencer, except the sequence should be a
+  vector of key, value pairs to be applied to the instrument"
+  [nome instrument pulses]
+  (let [bpb (metro-bpb nome)
+        bpm (metro-bpm nome)
+        clock (metronome (* bpm bpb))]
+    (play-sequence clock
+                   (async/to-chan pulses)
+                   #(apply instrument %)
+                   some?)))
 
 (defn drummachine
   "Accepts a metronome and a vector of instructions. Each instruction
