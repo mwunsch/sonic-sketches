@@ -56,7 +56,7 @@
   clock. e.g.
 
     (async/<!! (play-sequence (metronome 96)
-                              (async/to-chan 16)
+                              (async/to-chan (range 16))
                               (fn [x] (drums/kick))
                               (constantly true)))
 
