@@ -61,14 +61,17 @@
                               (constantly true)))
 
   performs a blocking take until 16 beats have elapsed."
-  [clock in f pred]
-  (async/go-loop [tick (metro-tick clock)]
-    (if-let [step (async/<! in)]
-      (do
-        (when (pred step) (f step))
-        (async/<! (async/timeout tick))
-        (recur (metro-tick clock)))
-      clock)))
+  ([clock in f]
+   (play-sequence clock in f (constantly true)))
+
+  ([clock in f pred]
+   (async/go-loop [tick (metro-tick clock)]
+     (if-let [step (async/<! in)]
+       (do
+         (when (pred step) (f step))
+         (async/<! (async/timeout tick))
+         (recur (metro-tick clock)))
+       clock))))
 
 (defn drummachine
   "Accepts a metronome and a vector of instructions. Each instruction
