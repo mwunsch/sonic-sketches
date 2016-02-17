@@ -47,6 +47,29 @@
         (apply-at (+ t (/ tick bars)) #'note-sequencer [nome instrument (rest pulses)]))
       (apply-at (+ t tick) println ["All finished"]))))
 
+(defn play-sequence
+  "Abstracting the notion of playing through a sequence, this fn takes
+  a clock (a metronome), an input channel, and a lambda. It takes
+  input off the channel at every clock tick and calls the lambda with
+  the input if pred returns true for that step. Returns an async
+  channel that will block until the input is closed and returns the
+  clock. e.g.
+
+    (async/<!! (play-sequence (metronome 96)
+                              (async/to-chan 16)
+                              (fn [x] (drums/kick))
+                              (constantly true)))
+
+  performs a blocking take until 16 beats have elapsed."
+  [clock in f pred]
+  (async/go-loop [tick (metro-tick clock)]
+    (if-let [step (async/<! in)]
+      (do
+        (when (pred step) (f step))
+        (async/<! (async/timeout tick))
+        (recur (metro-tick clock)))
+      clock)))
+
 (defn drummachine
   "Accepts a metronome and a vector of instructions. Each instruction
   is a pair of instruments and a sequence of 0's or 1's. Returns a seq
