@@ -7,15 +7,26 @@
             [amazonica.aws.s3 :as s3])
   (:gen-class))
 
+(defn clock-signal
+  "Given a metronome, returns a channel that is fed on every beat."
+  [nome]
+  (let [out (async/chan)]
+    (async/go-loop [tick (metro-tick nome)]
+      (when-let [pulse (async/>! out nome)]
+        (do
+          (async/<! (async/timeout tick))
+          (recur (metro-tick nome)))))
+    out))
+
 (defn play-sequence
   "Abstracting the notion of playing through a sequence, this fn takes
-  a clock (a metronome), an input channel, and a lambda. It takes
+  a clock, an input channel, and a lambda. It takes
   input off the channel at every clock tick and calls the lambda with
   the input if pred returns true for that step. Returns an async
   channel that will block until the input is closed and returns the
-  clock. e.g.
+  metronome powering the clock. e.g.
 
-    (async/<!! (play-sequence (metronome 96)
+    (async/<!! (play-sequence (clock-pulse (metronome 96))
                               (async/to-chan (range 16))
                               (fn [x] (drums/kick))
                               (constantly true)))
@@ -25,13 +36,13 @@
    (play-sequence clock in f (constantly true)))
 
   ([clock in f pred]
-   (async/go-loop [tick (metro-tick clock)]
-     (if-let [step (async/<! in)]
-       (do
-         (when (pred step) (f step))
-         (async/<! (async/timeout tick))
-         (recur (metro-tick clock)))
-       clock))))
+   (async/go-loop []
+     (when-let [pulse (async/<! clock)]
+       (if-let [step (async/<! in)]
+         (do
+           (when (pred step) (f step))
+           (recur))
+         pulse)))))
 
 (defn step-sequencer
   "Accepts a metronome, an instrument, and a seq of 0's or 1's. If the
@@ -41,8 +52,8 @@
   [nome instrument pulses]
   (let [bpb (metro-bpb nome)
         bpm (metro-bpm nome)
-        clock (metronome (* bpm bpb))]
-    (play-sequence clock
+        rate (* bpm bpb)]
+    (play-sequence (clock-signal (metronome rate))
                    (async/to-chan pulses)
                    (fn [x] (instrument))
                    pos?)))
@@ -53,8 +64,8 @@
   [nome instrument pulses]
   (let [bpb (metro-bpb nome)
         bpm (metro-bpm nome)
-        clock (metronome (* bpm bpb))]
-    (play-sequence clock
+        rate (* bpm bpb)]
+    (play-sequence (clock-signal (metronome rate))
                    (async/to-chan pulses)
                    #(apply instrument %)
                    some?)))
