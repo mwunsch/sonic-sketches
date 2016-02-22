@@ -1,7 +1,7 @@
 (ns sonic-sketches.core
   (:use [overtone.live])
   (:require [overtone.inst.drum :as drums]
-            [overtone.inst.synth :refer [tb303]]
+            [overtone.inst.synth :refer [tb303 overpad]]
             [clojure.core.async :as async]
             [clojure.data.generators :as datagen]
             [amazonica.aws.s3 :as s3])
