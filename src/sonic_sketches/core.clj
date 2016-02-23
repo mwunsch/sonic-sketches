@@ -137,6 +137,22 @@
        datagen/rand-nth
        metronome))
 
+(defn make-song
+  "A quick stab at combining a note-sequence and a
+  drummachine. Returns a seq of channels."
+  [bpm scale]
+  (let [drum-metro (metronome bpm)
+        drum-steps (-> (rand-drumsequence [drums/kick3 drums/snare drums/open-hat drums/closed-hat])
+                       (loop-sequence 4))
+        notes (->> scale
+                   (rand-notesequence 8)
+                   (repeat 2)
+                   (apply concat))]
+    (conj (drummachine drum-metro drum-steps)
+          (play-sequence (clock-signal drum-metro)
+                         (async/to-chan notes)
+                         #(apply overpad %)))))
+
 (defmacro make-recording
   [path out]
   `(do
