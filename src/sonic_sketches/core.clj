@@ -185,9 +185,16 @@
       (let [drums (datagen/reservoir-sample 6 percussion) ; 6 seems like a good number
             nome (rand-metronome :andante)
             drumsequence (-> (rand-drumsequence drums)
-                             (loop-sequence 8))]
+                             (loop-sequence 8))
+            notes (->> (scale :E3 :major)
+                       (rand-notesequence 8)
+                       (repeat 4)
+                       (apply concat))]
         (println "🎲 RNG Seed:" seed)
         (-> (make-recording path
-                            (async/go (async/alts! (drummachine nome drumsequence))))
+                            (async/go (async/alts! (conj (drummachine nome drumsequence)
+                                                         (play-sequence (clock-signal nome)
+                                                                        (async/to-chan notes)
+                                                                        #(apply overpad %))))))
             (upload-to-s3 :rng-seed seed
                           :bpm (metro-bpm nome)))))))
