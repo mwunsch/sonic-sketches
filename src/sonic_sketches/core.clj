@@ -42,7 +42,9 @@
          (do
            (when (pred step) (f step))
            (recur))
-         pulse)))))
+         (let [tick (metro-tick pulse)]
+           (async/<! (async/timeout tick))  ; wait one additional tick before setting val of chan
+           pulse))))))
 
 (defn step-sequencer
   "Accepts a metronome, an instrument, and a seq of 0's or 1's. If the
@@ -138,20 +140,30 @@
        metronome))
 
 (defn make-song
-  "A quick stab at combining a note-sequence and a
-  drummachine. Returns a seq of channels."
-  [bpm scale]
-  (let [drum-metro (metronome bpm)
-        drum-steps (-> (rand-drumsequence [drums/kick3 drums/snare drums/open-hat drums/closed-hat])
-                       (loop-sequence 4))
+  "Make a randomly generated song, returning a seq of async channels"
+  [metro lead drums scale]
+  (let [drumsequence (-> (rand-drumsequence drums)
+                         (loop-sequence 8))
         notes (->> scale
                    (rand-notesequence 8)
-                   (repeat 2)
-                   (apply concat))]
-    (conj (drummachine drum-metro drum-steps)
-          (play-sequence (clock-signal drum-metro)
+                   (repeat 4)
+                   (apply concat))
+        clock (clock-signal metro)]
+    (conj (drummachine metro drumsequence)
+          (play-sequence clock
                          (async/to-chan notes)
-                         #(apply overpad %)))))
+                         #(apply lead %)))))
+
+(defn replay-song-from-seed
+  "A temp function used to verify RNG seed works."
+  [seed]
+  (binding [datagen/*rnd* (java.util.Random. seed)]
+    (let [drums (datagen/reservoir-sample 6 percussion)
+          nome (rand-metronome :andante)]
+      (make-song nome
+                 overpad
+                 drums
+                 (scale :E3 :major)))))
 
 (defmacro make-recording
   [path out]
@@ -183,18 +195,12 @@
         seed (now)]
     (binding [datagen/*rnd* (java.util.Random. seed)]
       (let [drums (datagen/reservoir-sample 6 percussion) ; 6 seems like a good number
-            nome (rand-metronome :andante)
-            drumsequence (-> (rand-drumsequence drums)
-                             (loop-sequence 8))
-            notes (->> (scale :E3 :major)
-                       (rand-notesequence 8)
-                       (repeat 4)
-                       (apply concat))]
+            nome (rand-metronome :andante)]
         (println "🎲 RNG Seed:" seed)
         (-> (make-recording path
-                            (async/go (async/alts! (conj (drummachine nome drumsequence)
-                                                         (play-sequence (clock-signal nome)
-                                                                        (async/to-chan notes)
-                                                                        #(apply overpad %))))))
+                            (async/go (async/alts! (make-song nome
+                                                              overpad
+                                                              drums
+                                                              (scale :E3 :major)))))
             (upload-to-s3 :rng-seed seed
                           :bpm (metro-bpm nome)))))))
