@@ -60,18 +60,6 @@
                    (fn [x] (instrument))
                    pos?)))
 
-(defn note-sequencer
-  "Similar to the step-sequencer, except the sequence should be a
-  vector of key, value pairs to be applied to the instrument"
-  [nome instrument pulses]
-  (let [bpb (metro-bpb nome)
-        bpm (metro-bpm nome)
-        rate (* bpm bpb)]
-    (play-sequence (clock-signal (metronome rate))
-                   (async/to-chan pulses)
-                   #(apply instrument %)
-                   some?)))
-
 (defn drummachine
   "Accepts a metronome and a vector of instructions. Each instruction
   is a pair of instruments and a sequence of 0's or 1's. Returns a seq
