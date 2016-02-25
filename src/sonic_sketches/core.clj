@@ -139,31 +139,28 @@
        datagen/rand-nth
        metronome))
 
-(defn make-song
-  "Make a randomly generated song, returning a seq of async channels"
-  [metro lead drums scale]
-  (let [drumsequence (-> (rand-drumsequence drums)
-                         (loop-sequence 8))
-        notes (->> scale
-                   (rand-notesequence 8)
-                   (repeat 4)
-                   (apply concat))
-        clock (clock-signal metro)]
-    (conj (drummachine metro drumsequence)
-          (play-sequence clock
-                         (async/to-chan notes)
-                         #(apply lead %)))))
-
-(defn replay-song-from-seed
-  "A temp function used to verify RNG seed works."
+(defn gen-song
+  "With a seed for a RNG, compose a song. Returns a seq of async
+  channels."
   [seed]
   (binding [datagen/*rnd* (java.util.Random. seed)]
-    (let [drums (datagen/reservoir-sample 6 percussion)
-          nome (rand-metronome :andante)]
-      (make-song nome
-                 overpad
-                 drums
-                 (scale :E3 :major)))))
+    (let [tempo :andante
+          scale (scale :E3 :major)
+          metro (rand-metronome tempo)
+          clock (clock-signal metro)
+          drums (datagen/reservoir-sample 5 percussion)
+          drumsequence (-> (rand-drumsequence drums)
+                           (loop-sequence 8))
+          lead overpad
+          notes (->> scale
+                     (rand-notesequence 8)
+                     (repeat 4)
+                     (apply concat)
+                     (async/to-chan))]
+      (conj (drummachine metro drumsequence)
+            (play-sequence clock
+                           notes
+                           #(apply lead %))))))
 
 (defmacro make-recording
   [path out]
@@ -192,15 +189,10 @@
   [& args]
   (let [tempfile (java.io.File/createTempFile "test" ".wav")
         path (.getPath tempfile)
-        seed (now)]
-    (binding [datagen/*rnd* (java.util.Random. seed)]
-      (let [drums (datagen/reservoir-sample 6 percussion) ; 6 seems like a good number
-            nome (rand-metronome :andante)]
-        (println "🎲 RNG Seed:" seed)
-        (-> (make-recording path
-                            (async/go (async/alts! (make-song nome
-                                                              overpad
-                                                              drums
-                                                              (scale :E3 :major)))))
-            (upload-to-s3 :rng-seed seed
-                          :bpm (metro-bpm nome)))))))
+        seed (now)
+        current-version (System/getProperty "sonic-sketches.version")]
+    (println "🎲 RNG Seed:" seed)
+    (-> (make-recording path
+                        (async/go (async/alts! (gen-song seed))))
+        (upload-to-s3 :rng-seed seed
+                      :version current-version))))
