@@ -133,13 +133,17 @@
   [seed]
   (binding [datagen/*rnd* (java.util.Random. seed)]
     (let [tempo :andante
-          scale (scale :E3 :major)
+          scale (scale :C4 :major)
           metro (rand-metronome tempo)
           clock (clock-signal metro)
           drums (datagen/reservoir-sample 5 percussion)
           drumsequence (-> (rand-drumsequence drums)
                            (loop-sequence 8))
-          lead overpad
+          lead (partial tb303
+                        :amp 0.9
+                        :cutoff (datagen/rand-nth (range 500 20000))
+                        :wave (datagen/rand-nth (range 3))
+                        :decay (/ (metro-tick metro) 1000))
           notes (->> scale
                      (rand-notesequence 8)
                      (repeat 4)
