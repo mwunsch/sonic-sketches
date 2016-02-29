@@ -36,15 +36,18 @@
    (play-sequence clock in f (constantly true)))
 
   ([clock in f pred]
-   (async/go-loop []
-     (when-let [pulse (async/<! clock)]
-       (if-let [step (async/<! in)]
-         (do
-           (when (pred step) (f step))
-           (recur))
-         (let [tick (metro-tick pulse)]
-           (async/<! (async/timeout tick))  ; wait one additional tick before setting val of chan
-           pulse))))))
+   (let [out (async/chan)]
+     (async/go-loop []
+       (when-let [pulse (async/<! clock)]
+         (if-let [step (async/<! in)]
+           (do
+             (when (pred step) (f step))
+             (recur))
+           (let [tick (metro-tick pulse)]
+             (async/<! (async/timeout tick)) ; wait one additional tick before setting val of chan
+             (async/>! out pulse)
+             (async/close! out)))))
+     out)))
 
 (defn step-sequencer
   "Accepts a metronome, an instrument, and a seq of 0's or 1's. If the
@@ -62,11 +65,13 @@
 
 (defn drummachine
   "Accepts a metronome and a vector of instructions. Each instruction
-  is a pair of instruments and a sequence of 0's or 1's. Returns a seq
-  of async channels suitable for use with `alts!!`"
+  is a pair of instruments and a sequence of 0's or 1's. Returns a
+  single async channel that blocks until all sequences have been
+  completed."
   [nome instructions]
-  (for [[instrument pulses] instructions]
-    (async/go (async/<! (step-sequencer nome instrument pulses)))))
+  (->> (for [[instrument pulses] instructions] (step-sequencer nome instrument pulses))
+       async/merge
+       (async/into [])))
 
 (defn rand-notesequence
   "Produce a n notes from given scale randomly. Returns a vector
@@ -149,10 +154,10 @@
                      (repeat 4)
                      (apply concat)
                      (async/to-chan))]
-      (conj (drummachine metro drumsequence)
-            (play-sequence clock
-                           notes
-                           #(apply lead %))))))
+      (->> [(drummachine metro drumsequence)
+            (play-sequence clock notes #(apply lead %))]
+           async/merge
+           (async/into [])))))
 
 (defmacro make-recording
   [path out]
@@ -184,7 +189,6 @@
         seed (now)
         current-version (System/getProperty "sonic-sketches.version")]
     (println "🎲 RNG Seed:" seed)
-    (-> (make-recording path
-                        (async/go (async/alts! (gen-song seed))))
+    (-> (make-recording path (gen-song seed))
         (upload-to-s3 :rng-seed seed
                       :version current-version))))
