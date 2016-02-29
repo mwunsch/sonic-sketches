@@ -137,8 +137,8 @@
   channels."
   [seed]
   (binding [datagen/*rnd* (java.util.Random. seed)]
-    (let [tempo :andante
-          scale (scale :C4 :major)
+    (let [tempo :allegro
+          scale (scale :D3 :minor)
           metro (rand-metronome tempo)
           clock (clock-signal metro)
           drums (datagen/reservoir-sample 5 percussion)
