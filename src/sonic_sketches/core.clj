@@ -18,7 +18,7 @@
           (recur (metro-tick nome)))))
     out))
 
-(defn play-sequence
+(defn sequencer
   "Abstracting the notion of playing through a sequence, this fn takes
   a clock, an input channel, and a lambda. It takes
   input off the channel at every clock tick and calls the lambda with
@@ -26,14 +26,14 @@
   channel that will block until the input is closed and returns the
   metronome powering the clock. e.g.
 
-    (async/<!! (play-sequence (clock-pulse (metronome 96))
+    (async/<!! (sequencer (clock-pulse (metronome 96))
                               (async/to-chan (range 16))
                               (fn [x] (drums/kick))
                               (constantly true)))
 
   performs a blocking take until 16 beats have elapsed."
   ([clock in f]
-   (play-sequence clock in f (constantly true)))
+   (sequencer clock in f (constantly true)))
 
   ([clock in f pred]
    (let [out (async/chan)]
@@ -64,10 +64,10 @@
     (->> (for [[instrument pulses] instructions
                :let [in (async/to-chan pulses)
                      tap (async/tap multiclock (async/chan))]]
-           (play-sequence tap
-                          in
-                          (fn [x] (instrument))
-                          pos?))
+           (sequencer tap
+                      in
+                      (fn [x] (instrument))
+                      pos?))
          async/merge
          (async/into []))))
 
@@ -153,7 +153,7 @@
                      (apply concat)
                      (async/to-chan))]
       (->> [(drummachine metro drumsequence)
-            (play-sequence clock notes #(apply lead %))]
+            (sequencer clock notes #(apply lead %))]
            async/merge
            (async/into [])))))
 
