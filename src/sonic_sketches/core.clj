@@ -38,7 +38,7 @@
   ([clock in f pred]
    (let [out (async/chan)]
      (async/go-loop []
-       (when-let [pulse (async/<! clock)]
+       (if-let [pulse (async/<! clock)]
          (if-let [step (async/<! in)]
            (do
              (when (pred step) (f step))
@@ -46,7 +46,8 @@
            (let [tick (metro-tick pulse)]
              (async/<! (async/timeout tick)) ; wait one additional tick before setting val of chan
              (async/>! out pulse)
-             (async/close! out)))))
+             (async/close! out)))
+         (async/close! out)))
      out)))
 
 (defn step-sequencer
