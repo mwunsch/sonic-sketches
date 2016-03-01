@@ -50,29 +50,26 @@
          (async/close! out)))
      out)))
 
-(defn step-sequencer
-  "Accepts a metronome, an instrument, and a seq of 0's or 1's. If the
-  pulse is 1, the instrument will play. The sequence will be treated
-  as if each step is a fraction of a beat, the denominator being the
-  number of beats in a bar as determined by the metronome."
-  [nome instrument pulses]
-  (let [bpb (metro-bpb nome)
-        bpm (metro-bpm nome)
-        rate (* bpm bpb)]
-    (play-sequence (clock-signal (metronome rate))
-                   (async/to-chan pulses)
-                   (fn [x] (instrument))
-                   pos?)))
-
 (defn drummachine
   "Accepts a metronome and a vector of instructions. Each instruction
   is a pair of instruments and a sequence of 0's or 1's. Returns a
   single async channel that blocks until all sequences have been
   completed."
   [nome instructions]
-  (->> (for [[instrument pulses] instructions] (step-sequencer nome instrument pulses))
-       async/merge
-       (async/into [])))
+  (let [bpb (metro-bpb nome)
+        bpm (metro-bpm nome)
+        metro (metronome (* bpm bpb))
+        clock (clock-signal metro)
+        multiclock (async/mult clock)]
+    (->> (for [[instrument pulses] instructions
+               :let [in (async/to-chan pulses)
+                     tap (async/tap multiclock (async/chan))]]
+           (play-sequence tap
+                          in
+                          (fn [x] (instrument))
+                          pos?))
+         async/merge
+         (async/into []))))
 
 (defn rand-notesequence
   "Produce a n notes from given scale randomly. Returns a vector
