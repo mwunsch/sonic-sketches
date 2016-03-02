@@ -20,11 +20,10 @@
 
 (defn sequencer
   "Abstracting the notion of playing through a sequence, this fn takes
-  a clock, an input channel, and a lambda. It takes
-  input off the channel at every clock tick and calls the lambda with
-  the input if pred returns true for that step. Returns an async
-  channel that will block until the input is closed and returns the
-  metronome powering the clock. e.g.
+  a clock, an input channel, and a lambda. It takes input off the
+  channel at every clock tick and calls the lambda with the
+  input. Returns an async channel that will block until the input is
+  closed and returns the metronome powering the clock. e.g.
 
     (async/<!! (sequencer (clock-pulse (metronome 96))
                               (async/to-chan (range 16))
@@ -32,23 +31,20 @@
                               (constantly true)))
 
   performs a blocking take until 16 beats have elapsed."
-  ([clock in f]
-   (sequencer clock in f (constantly true)))
-
-  ([clock in f pred]
-   (let [out (async/chan)]
-     (async/go-loop []
-       (if-let [pulse (async/<! clock)]
-         (if-let [step (async/<! in)]
-           (do
-             (when (pred step) (f step))
-             (recur))
-           (let [tick (metro-tick pulse)]
-             (async/<! (async/timeout tick)) ; wait one additional tick before setting val of chan
-             (async/>! out pulse)
-             (async/close! out)))
-         (async/close! out)))
-     out)))
+  [clock in f]
+  (let [out (async/chan)]
+    (async/go-loop []
+      (if-let [pulse (async/<! clock)]
+        (if-let [step (async/<! in)]
+          (do
+            (f step)
+            (recur))
+          (let [tick (metro-tick pulse)]
+            (async/<! (async/timeout tick)) ; wait one additional tick before setting val of chan
+            (async/>! out pulse)
+            (async/close! out)))
+        (async/close! out)))
+    out))
 
 (defn drummachine
   "Accepts a metronome and a vector of instructions. Each instruction
@@ -63,11 +59,9 @@
         multiclock (async/mult clock)]
     (->> (for [[instrument pulses] instructions
                :let [in (async/to-chan pulses)
-                     tap (async/tap multiclock (async/chan))]]
-           (sequencer tap
-                      in
-                      (fn [x] (instrument))
-                      pos?))
+                     tap (async/tap multiclock (async/chan))
+                     instfn #(when (pos? %) (instrument))]]
+           (sequencer tap in instfn))
          async/merge
          (async/into []))))
 
