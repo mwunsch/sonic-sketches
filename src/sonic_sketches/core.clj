@@ -7,6 +7,8 @@
             [amazonica.aws.s3 :as s3])
   (:gen-class))
 
+(def signals (atom '()))
+
 (defn clock-signal
   "Given a metronome, returns a channel that is fed on every beat."
   [nome]
@@ -16,7 +18,16 @@
         (do
           (async/<! (async/timeout tick))
           (recur (metro-tick nome)))))
+    (swap! signals conj out)
     out))
+
+(defn kill-signals
+  "Close all clock channels and remove them from the list of active
+  signals."
+  []
+  (swap! signals #(->> %
+                      (map async/close!)
+                      (remove nil?))))
 
 (defn sequencer
   "Abstracting the notion of playing through a sequence, this fn takes
