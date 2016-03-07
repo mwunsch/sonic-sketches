@@ -138,8 +138,9 @@
   "With a seed for a RNG, compose a song. Returns a seq of async
   channels."
   [seed]
+  (println "🎲 RNG Seed:" seed)
   (binding [datagen/*rnd* (java.util.Random. seed)]
-    (let [tempo :allegro
+    (let [tempo (datagen/rand-nth (keys tempo-map))
           scale (scale :D3 :minor)
           metro (rand-metronome tempo)
           clock (clock-signal metro)
@@ -156,6 +157,7 @@
                      (repeat 4)
                      (apply concat)
                      (async/to-chan))]
+      (println "🎵 BPM:" (metro-bpm metro))
       (->> [(drummachine metro drumsequence)
             (sequencer clock notes #(apply lead %))]
            async/merge
@@ -190,7 +192,6 @@
         path (.getPath tempfile)
         seed (now)
         current-version (System/getProperty "sonic-sketches.version")]
-    (println "🎲 RNG Seed:" seed)
     (-> (make-recording path (gen-song seed))
         (upload-to-s3 :rng-seed seed
                       :version current-version))))
