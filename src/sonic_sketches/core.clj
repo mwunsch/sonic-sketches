@@ -38,8 +38,7 @@
 
     (async/<!! (sequencer (clock-pulse (metronome 96))
                               (async/to-chan (range 16))
-                              (fn [x] (drums/kick))
-                              (constantly true)))
+                              (fn [x] (drums/kick))))
 
   performs a blocking take until 16 beats have elapsed."
   [clock in f]
