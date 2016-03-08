@@ -4,7 +4,9 @@
             [overtone.inst.synth :refer [tb303 overpad]]
             [clojure.core.async :as async]
             [clojure.data.generators :as datagen]
-            [amazonica.aws.s3 :as s3])
+            [amazonica.aws.s3 :as s3]
+            [clj-http.client :as http]
+            [clojure.data.json :as json])
   (:gen-class))
 
 (def signals (atom '()))
