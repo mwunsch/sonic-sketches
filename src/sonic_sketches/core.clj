@@ -1,12 +1,11 @@
 (ns sonic-sketches.core
   (:use [overtone.live])
   (:require [overtone.inst.drum :as drums]
-            [overtone.inst.synth :refer [tb303 overpad]]
+            [overtone.inst.synth :refer [tb303]]
             [clojure.core.async :as async]
             [clojure.data.generators :as datagen]
             [amazonica.aws.s3 :as s3]
-            [clj-http.client :as http]
-            [clojure.data.json :as json])
+            [sonic-sketches.forecast :as forecast])
   (:gen-class))
 
 (def signals (atom '()))
