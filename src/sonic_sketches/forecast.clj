@@ -10,8 +10,7 @@
   [40.7903 73.9597])
 
 (defn call
-  [lat lon]
+  [coords & params]
   (let [base-url "https://api.forecast.io/forecast"
-        coord (join "," (map str [lat lon]))
-        url (join "/" [base-url api-key coord])]
+        url (join "/" [base-url api-key (join "," (map str coords))])]
     (http/get url)))
