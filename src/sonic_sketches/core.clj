@@ -8,7 +8,8 @@
             [sonic-sketches.forecast :as forecast])
   (:gen-class))
 
-(def signals (atom '()))
+(def signals
+  (atom '()))
 
 (defn clock-signal
   "Given a metronome, returns a channel that is fed on every beat."

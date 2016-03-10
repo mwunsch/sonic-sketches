@@ -4,7 +4,8 @@
   (:require [clj-http.client :as http]
             [clojure.data.json :as json]))
 
-(def api-key (System/getenv "FORECAST_API_KEY"))
+(def api-key
+  (System/getenv "FORECAST_API_KEY"))
 
 (def nyc-geo
   [40.7903 73.9597])
