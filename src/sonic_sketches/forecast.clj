@@ -10,7 +10,7 @@
 (defn call
   "Performs a call to the Forecast API for a daily summary. Accepts a
   pair of lat/long coords and a Long time in millis (like that found
-  from System/currentTimeMillis). Will throw an Exception if
+  from `System/currentTimeMillis`). Will throw an Exception if
   unsuccessful."
   [lat lon time]
   (let [base-url "https://api.forecast.io/forecast"
