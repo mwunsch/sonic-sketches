@@ -139,7 +139,7 @@
 (defn gen-song
   "With a seed for a RNG, compose a song. Returns a seq of async
   channels."
-  [seed]
+  [seed & weather]
   (println "🎲 RNG Seed:" seed)
   (binding [datagen/*rnd* (java.util.Random. seed)]
     (let [tempo (datagen/rand-nth (keys tempo-map))
@@ -193,7 +193,11 @@
   (let [tempfile (java.io.File/createTempFile "test" ".wav")
         path (.getPath tempfile)
         seed (now)
-        current-version (System/getProperty "sonic-sketches.version")]
-    (-> (make-recording path (gen-song seed))
+        current-version (System/getProperty "sonic-sketches.version")
+        {:keys [latitude longitude daily] :as weather} (:body (forecast/nyc-at seed))]
+    (-> (make-recording path
+                        (gen-song seed daily))
         (upload-to-s3 :rng-seed seed
-                      :version current-version))))
+                      :version current-version
+                      :latitude latitude
+                      :longitude longitude))))
