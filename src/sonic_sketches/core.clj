@@ -142,7 +142,8 @@
   [seed & weather]
   (println "🎲 RNG Seed:" seed)
   (binding [datagen/*rnd* (java.util.Random. seed)]
-    (let [tempo (datagen/rand-nth (keys tempo-map))
+    (let [today (apply merge weather)
+          tempo (datagen/rand-nth (keys tempo-map))
           scale (scale :D3 :minor)
           metro (rand-metronome tempo)
           clock (clock-signal metro)
