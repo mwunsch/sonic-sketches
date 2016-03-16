@@ -140,7 +140,8 @@
   "The lunar phase is a number 0 - 100 which indicates 'completeness'
   of a moon's lunar cycle. 50 represents a full moon. This fn
   determines how 'full' the moon is for a given phase on a scale of 0
-  thru 5 (which corresponds to the indices of the tempo-map)."
+  thru 5 where 0 is a full moon, corresponding to the indices of the
+  tempo-map."
   [phase]
   (-> phase
       (- 50)
