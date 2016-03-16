@@ -136,6 +136,19 @@
        datagen/rand-nth
        metronome))
 
+(defn lunar-illumination
+  "The lunar phase is a number 0 - 100 which indicates 'completeness'
+  of a moon's lunar cycle. 50 represents a full moon. This fn
+  determines how 'full' the moon is for a given phase on a scale of 0
+  thru 5 (which corresponds to the indices of the tempo-map)."
+  [phase]
+  (-> phase
+      (- 50)
+      Math/abs
+      (/ 10)
+      float
+      Math/round))
+
 (defn gen-song
   "With a seed for a RNG, compose a song. Returns a seq of async
   channels."
@@ -143,7 +156,12 @@
   (println "🎲 RNG Seed:" seed)
   (binding [datagen/*rnd* (java.util.Random. seed)]
     (let [today (apply merge weather)
-          tempo (datagen/rand-nth (keys tempo-map))
+          lunar-phase (->> (or (some :moonPhase (:data today))
+                               (datagen/float))
+                           (* 100)
+                           Math/round)
+          tempo (->> (lunar-illumination lunar-phase)
+                     (nth (reverse (keys tempo-map))))
           scale (scale :D3 :minor)
           metro (rand-metronome tempo)
           clock (clock-signal metro)
