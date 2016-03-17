@@ -140,8 +140,7 @@
   "The lunar phase is a number 0 - 100 which indicates 'completeness'
   of a moon's lunar cycle. 50 represents a full moon. This fn
   determines how 'full' the moon is for a given phase on a scale of 0
-  thru 5 where 5 is a full moon, corresponding to the indices of the
-  tempo-map."
+  thru 5 where 5 is a full moon."
   [phase]
   (-> phase
       (- 50)
@@ -151,6 +150,19 @@
       (/ 10)
       float
       Math/round))
+
+(defn lunar-str
+  "Given a lunar phase number, returns an Emoji string displaying a
+  visual representation of the moon for that phase."
+  [phase]
+  (let [moons (->> (range 0x1f311 0x1f319)
+                   (map int)
+                   (mapv (partial format "%c")))
+        indices (- (count moons) 1)]
+    (nth moons (-> phase
+                   (/ (quot 100 indices))
+                   float
+                   Math/round))))
 
 (defn gen-song
   "With a seed for a RNG, compose a song. Returns a seq of async
@@ -181,7 +193,7 @@
                      (repeat 4)
                      (apply concat)
                      (async/to-chan))]
-      (println "🎵 BPM:" (metro-bpm metro))
+      (println (lunar-str lunar-phase) "BPM:" (metro-bpm metro))
       (->> [(drummachine metro drumsequence)
             (sequencer clock notes #(apply lead %))]
            async/merge
