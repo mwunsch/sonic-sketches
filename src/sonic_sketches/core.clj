@@ -140,10 +140,12 @@
   "The lunar phase is a number 0 - 100 which indicates 'completeness'
   of a moon's lunar cycle. 50 represents a full moon. This fn
   determines how 'full' the moon is for a given phase on a scale of 0
-  thru 5 where 0 is a full moon, corresponding to the indices of the
+  thru 5 where 5 is a full moon, corresponding to the indices of the
   tempo-map."
   [phase]
   (-> phase
+      (- 50)
+      Math/abs
       (- 50)
       Math/abs
       (/ 10)
@@ -162,7 +164,7 @@
                            (* 100)
                            Math/round)
           tempo (->> (lunar-illumination lunar-phase)
-                     (nth (reverse (keys tempo-map))))
+                     (nth (keys tempo-map)))
           scale (scale :D3 :minor)
           metro (rand-metronome tempo)
           clock (clock-signal metro)
