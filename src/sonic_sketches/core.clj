@@ -177,10 +177,14 @@
                            Math/round)
           hi-temp (some :apparentTemperatureMax (:data today))
           lo-temp (some :apparentTemperatureMin (:data today))
-          avg-temp (/ (+ hi-temp lo-temp) 2)  ; warning: null pointer exception can happen here
+          avg-temp (if (and (some? hi-temp) (some? lo-temp))
+                     (/ (+ hi-temp lo-temp) 2)
+                     (datagen/uniform 0 100))
           sunrise (some :sunriseTime (:data today))
           sunset (some :sunsetTime (:data today))
-          length-of-day (float (/ (- sunset sunrise) 3600)) ; warning: null pointer exception can happen here
+          length-of-day (if (and (some? sunrise) (some? sunset))
+                          (float (/ (- sunset sunrise) 3600))
+                          (datagen/uniform 6 16))
           tempo (->> (lunar-illumination lunar-phase)
                      (nth (keys tempo-map)))
           scale (scale :D3 :minor)
