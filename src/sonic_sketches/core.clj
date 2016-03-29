@@ -164,6 +164,27 @@
                    float
                    Math/round))))
 
+(defn daily-data->map
+  "Returns a  map of valuable  data points computed from  Forecast API
+  data.  Will randomly generate  substitute  values  if API  data  is
+  missing."
+  [data]
+  (let [moon-phase (some :moonPhase data)
+        hi-temp (some :apparentTemperatureMax data)
+        lo-temp (some :apparentTemperatureMin data)
+        sunrise (some :sunriseTime data)
+        sunset (some :sunsetTime data)]
+    {:lunar-phase (->> (or moon-phase
+                           (datagen/float))
+                       (* 100)
+                       Math/round)
+     :avg-temp (if (and (some? hi-temp) (some? lo-temp))
+                 (/ (+ hi-temp lo-temp) 2)
+                 (datagen/uniform 0 100))
+     :length-of-day (if (and (some? sunrise) (some? sunset))
+                          (float (/ (- sunset sunrise) 3600))
+                          (datagen/uniform 6 16))}))
+
 (defn gen-song
   "With a seed for a RNG, compose a song. Returns a seq of async
   channels."
@@ -171,20 +192,7 @@
   (println "🎲 RNG Seed:" seed)
   (binding [datagen/*rnd* (java.util.Random. seed)]
     (let [today (apply merge weather)
-          lunar-phase (->> (or (some :moonPhase (:data today))
-                               (datagen/float))
-                           (* 100)
-                           Math/round)
-          hi-temp (some :apparentTemperatureMax (:data today))
-          lo-temp (some :apparentTemperatureMin (:data today))
-          avg-temp (if (and (some? hi-temp) (some? lo-temp))
-                     (/ (+ hi-temp lo-temp) 2)
-                     (datagen/uniform 0 100))
-          sunrise (some :sunriseTime (:data today))
-          sunset (some :sunsetTime (:data today))
-          length-of-day (if (and (some? sunrise) (some? sunset))
-                          (float (/ (- sunset sunrise) 3600))
-                          (datagen/uniform 6 16))
+          {:keys [lunar-phase avg-temp length-of-day] :as daily-data} (daily-data->map (:data today))
           tempo (->> (lunar-illumination lunar-phase)
                      (nth (keys tempo-map)))
           scale (scale :D3 :minor)
