@@ -179,7 +179,27 @@
      :avg-temp (when (and (some? hi-temp) (some? lo-temp))
                  (/ (+ hi-temp lo-temp) 2))
      :length-of-day (when (and (some? sunrise) (some? sunset))
-                          (float (/ (- sunset sunrise) 3600)))}))
+                      (float (/ (- sunset sunrise) 3600)))}))
+
+(def key-range
+  (let [notes (vals (into (sorted-map) REVERSE-NOTES))
+        octaves (zipmap (range 2 5) (repeat notes))]
+    (->> (for [[octave key] octaves]
+           (mapv #(mk-midi-string % octave) key))
+         (apply concat)
+         (into []))))
+
+(defn temperature->key
+  [temp]
+  (let [index-max (- (count key-range) 1)
+        scaled (-> (scale-range temp 0 100 0 index-max)
+                   float
+                   Math/round)
+        index (cond
+                (< scaled 0) 0
+                (< 100 scaled) index-max
+                :else scaled)]
+    (nth key-range index)))
 
 (defn gen-song
   "With a seed for a RNG, compose a song. Returns a seq of async
@@ -195,7 +215,8 @@
            :as daily-data} (into {} (filter val (daily-data->map (:data today))))
           tempo (->> (lunar-illumination lunar-phase)
                      (nth (keys tempo-map)))
-          scale (scale :D3 :minor)
+          pitch-key (temperature->key avg-temp)
+          scale (scale pitch-key :minor)
           metro (rand-metronome tempo)
           clock (clock-signal metro)
           drums (datagen/reservoir-sample 5 percussion)
@@ -203,7 +224,7 @@
                            (loop-sequence 8))
           lead (partial tb303
                         :amp 0.9
-                        :cutoff (datagen/rand-nth (range 500 20000))
+                        :cutoff (datagen/rand-nth (range 1000 20000))
                         :wave (datagen/rand-nth (range 3))
                         :decay (/ (metro-tick metro) 1000))
           notes (->> scale
@@ -212,6 +233,7 @@
                      (apply concat)
                      (async/to-chan))]
       (println (lunar-str lunar-phase) "BPM:" (metro-bpm metro))
+      (println "🎵 Pitch:" pitch-key (str "(" avg-temp "°)"))
       (->> [(drummachine metro drumsequence)
             (sequencer clock notes #(apply lead %))]
            async/merge
