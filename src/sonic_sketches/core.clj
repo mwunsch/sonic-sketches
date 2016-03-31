@@ -161,11 +161,11 @@
   "Returns a  map of valuable  data points computed from  Forecast API
   data. Map values will be nil if API data is missing."
   [data]
-  (let [moon-phase (some :moonPhase data)
-        hi-temp (some :apparentTemperatureMax data)
-        lo-temp (some :apparentTemperatureMin data)
-        sunrise (some :sunriseTime data)
-        sunset (some :sunsetTime data)]
+  (let [{ moon-phase :moonPhase
+          hi-temp :apparentTemperatureMax
+          lo-temp :apparentTemperatureMin
+          sunrise :sunriseTime
+          sunset :sunsetTime } (apply merge data)]
     {:lunar-phase (some->> moon-phase
                        (* 100)
                        Math/round)
