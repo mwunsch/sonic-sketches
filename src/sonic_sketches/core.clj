@@ -129,13 +129,6 @@
        vals
        (map var-get)))
 
-(defn rand-metronome
-  "Given a tempo, choose a random BPM."
-  [tempo]
-  (->> (tempo tempo-map)
-       datagen/rand-nth
-       metronome))
-
 (defn lunar-illumination
   "The lunar phase is a number 0 - 100 which indicates 'completeness'
   of a moon's lunar cycle. 50 represents a full moon. This fn
@@ -213,11 +206,13 @@
                 avg-temp (datagen/uniform 0 100)
                 length-of-day (datagen/uniform 6 16)}
            :as daily-data} (into {} (filter val (daily-data->map (:data today))))
-          tempo (->> (lunar-illumination lunar-phase)
-                     (nth (keys tempo-map)))
           pitch-key (temperature->key avg-temp)
           scale (scale pitch-key :minor)
-          metro (rand-metronome tempo)
+          tempo (->> (lunar-illumination lunar-phase)
+                     (nth (keys tempo-map)))
+          metro (->> (tempo tempo-map)
+                     datagen/rand-nth
+                     metronome)
           clock (clock-signal metro)
           drums (datagen/reservoir-sample 5 percussion)
           drumsequence (-> (rand-drumsequence drums)
