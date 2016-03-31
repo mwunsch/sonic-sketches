@@ -227,8 +227,10 @@
                      (repeat 4)
                      (apply concat)
                      (async/to-chan))]
-      (println (lunar-str lunar-phase) "BPM:" (metro-bpm metro))
-      (println "🎵 Pitch:" pitch-key (str "(" avg-temp "°)"))
+      (println (str (lunar-str lunar-phase)
+                    " BPM: " (metro-bpm metro)
+                    " 🎵 Pitch: " pitch-key
+                    " (" avg-temp " ℉)"))
       (->> [(drummachine metro drumsequence)
             (sequencer clock notes #(apply lead %))]
            async/merge
