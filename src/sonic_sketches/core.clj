@@ -259,7 +259,7 @@
                    :file recording
                    :metadata {:user-metadata (apply hash-map metadata)})))
 
-(defn -run
+(defn generate->record->upload
   [& args]
   (let [tempfile (java.io.File/createTempFile "test" ".wav")
         path (.getPath tempfile)
@@ -275,5 +275,5 @@
 
 (defn -main
   [& args]
-  (-run)
+  (generate->record->upload)
   (System/exit 0))
