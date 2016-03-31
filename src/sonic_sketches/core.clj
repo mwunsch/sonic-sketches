@@ -262,7 +262,7 @@
                    :file recording
                    :metadata {:user-metadata (apply hash-map metadata)})))
 
-(defn -main
+(defn -run
   [& args]
   (let [tempfile (java.io.File/createTempFile "test" ".wav")
         path (.getPath tempfile)
@@ -275,3 +275,8 @@
                       :version current-version
                       :latitude latitude
                       :longitude longitude))))
+
+(defn -main
+  [& args]
+  (-run)
+  (System/exit 0))
