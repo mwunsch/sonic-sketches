@@ -208,13 +208,23 @@
   (println "🎲 RNG Seed:" seed)
   (binding [datagen/*rnd* (java.util.Random. seed)]
     (let [today (apply merge weather)
-          {:keys [lunar-phase avg-temp length-of-day]
+          {:keys [lunar-phase avg-temp length-of-day precip precip-prob cloudy]
            :or {lunar-phase (datagen/uniform 0 100)
                 avg-temp (datagen/uniform 0 100)
-                length-of-day (datagen/uniform 6 16)}
+                length-of-day (datagen/uniform 6 16)
+                precip (datagen/rand-nth [0 0.002 0.017 0.1 0.4])
+                precip-prob (datagen/float)
+                cloudy (datagen/boolean)}
            :as daily-data} (into {} (filter val (daily-data->map today)))
           pitch-key (temperature->key avg-temp)
-          scale (scale pitch-key :minor)
+          interval (if (> precip-prob 0.5)
+                     (condp <= precip
+                       0.1 :minor
+                       0.017 :minor-pentatonic
+                       0.002 :harmonic-minor
+                       :major-pentatonic)
+                     (if cloudy :lydian :major))
+          scale (scale pitch-key interval)
           tempo (->> (lunar-illumination lunar-phase)
                      (nth (keys tempo-map)))
           metro (->> (tempo tempo-map)
@@ -236,8 +246,8 @@
                      (async/to-chan))]
       (println (str (lunar-str lunar-phase)
                     " BPM: " (metro-bpm metro)
-                    " 🎵 Pitch: " pitch-key
-                    " (" avg-temp " ℉)"))
+                    " 🎵 " pitch-key " " (name interval)
+                    " 🌡 " avg-temp " ℉"))
       (->> [(drummachine metro drumsequence)
             (sequencer clock notes #(apply lead %))]
            async/merge
