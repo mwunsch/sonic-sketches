@@ -205,7 +205,7 @@
            :or {lunar-phase (datagen/uniform 0 100)
                 avg-temp (datagen/uniform 0 100)
                 length-of-day (datagen/uniform 6 16)}
-           :as daily-data} (into {} (filter val (daily-data->map (:data today))))
+           :as daily-data} (into {} (filter val (daily-data->map today)))
           pitch-key (temperature->key avg-temp)
           scale (scale pitch-key :minor)
           tempo (->> (lunar-illumination lunar-phase)
@@ -267,7 +267,7 @@
         current-version (System/getProperty "sonic-sketches.version")
         {:keys [latitude longitude daily] :as weather} (:body (forecast/nyc-at seed))]
     (-> (make-recording path
-                        (gen-song seed daily))
+                        (gen-song seed (:data daily)))
         (upload-to-s3 :rng-seed seed
                       :version current-version
                       :latitude latitude
