@@ -161,18 +161,25 @@
   "Returns a  map of valuable  data points computed from  Forecast API
   data. Map values will be nil if API data is missing."
   [data]
-  (let [{ moon-phase :moonPhase
-          hi-temp :apparentTemperatureMax
-          lo-temp :apparentTemperatureMin
-          sunrise :sunriseTime
-          sunset :sunsetTime } (apply merge data)]
+  (let [{moon-phase :moonPhase
+         hi-temp :apparentTemperatureMax
+         lo-temp :apparentTemperatureMin
+         sunrise :sunriseTime
+         sunset :sunsetTime
+         precip-probability :precipProbability
+         precip-intensity :precipIntensity
+         cloudy :cloudCover} (apply merge data)]
     {:lunar-phase (some->> moon-phase
-                       (* 100)
-                       Math/round)
+                           (* 100)
+                           Math/round)
      :avg-temp (when (and (some? hi-temp) (some? lo-temp))
                  (/ (+ hi-temp lo-temp) 2))
      :length-of-day (when (and (some? sunrise) (some? sunset))
-                      (float (/ (- sunset sunrise) 3600)))}))
+                      (float (/ (- sunset sunrise) 3600)))
+     :precip (when (and (some? precip-probability) (some? precip-intensity))
+               precip-intensity)
+     :precip-prob precip-probability
+     :cloudy (and (some? cloudy) (> cloudy 0.75))}))
 
 (def key-range
   (let [notes (vals (into (sorted-map) REVERSE-NOTES))
