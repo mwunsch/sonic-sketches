@@ -304,5 +304,6 @@
 
 (defn -main
   [& args]
+  (volume 0.6)
   (generate->record->upload)
   (System/exit 0))
