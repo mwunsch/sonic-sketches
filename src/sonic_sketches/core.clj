@@ -291,8 +291,9 @@
 (defn generate->record->upload
   [& args]
   (let [seed (now)
-        cal (doto (java.util.Calendar/getInstance)
-              (.setTimeInMillis seed))
+        cal (doto
+                (java.util.Calendar/getInstance)
+                (.setTimeInMillis seed))
         day-of-week (-> cal
                         (.getDisplayName java.util.Calendar/DAY_OF_WEEK
                                          java.util.Calendar/LONG_STANDALONE
