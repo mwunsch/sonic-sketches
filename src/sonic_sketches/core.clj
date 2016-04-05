@@ -288,17 +288,22 @@
                          :data)]
      (gen-song seed weather))))
 
+(defn get-day-of-week
+  "For a given seed (milliseconds since unix epoch) return its day of
+  week as a lower-case string"
+  [seed]
+  (let [cal (doto
+                (java.util.Calendar/getInstance)
+              (.setTimeInMillis seed))
+        locale (java.util.Locale/getDefault)]
+    (-> cal
+        (.getDisplayName java.util.Calendar/DAY_OF_WEEK java.util.Calendar/LONG_STANDALONE locale)
+        .toLowerCase)))
+
 (defn generate->record->upload
   [& args]
   (let [seed (now)
-        cal (doto
-                (java.util.Calendar/getInstance)
-                (.setTimeInMillis seed))
-        day-of-week (-> cal
-                        (.getDisplayName java.util.Calendar/DAY_OF_WEEK
-                                         java.util.Calendar/LONG_STANDALONE
-                                         (java.util.Locale/getDefault))
-                        .toLowerCase)
+        day-of-week (get-day-of-week seed)
         tempfile (java.io.File/createTempFile (str day-of-week "-") ".wav")
         path (.getPath tempfile)
         current-version (System/getProperty "sonic-sketches.version")
