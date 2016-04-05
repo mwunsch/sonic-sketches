@@ -277,6 +277,17 @@
                    :file recording
                    :metadata {:user-metadata (apply hash-map metadata)})))
 
+(defn play-generated-song
+  "A handy convenience function to play a song from a given time, or
+  to generate one for the current time."
+  ([] (play-song (now)))
+  ([seed]
+   (let [weather (some-> (forecast/nyc-at seed)
+                         :body
+                         :daily
+                         :data)]
+     (gen-song seed weather))))
+
 (defn generate->record->upload
   [& args]
   (let [tempfile (java.io.File/createTempFile "test" ".wav")
