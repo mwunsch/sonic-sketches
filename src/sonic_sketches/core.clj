@@ -179,7 +179,7 @@
      :precip (when (and (some? precip-probability) (some? precip-intensity))
                precip-intensity)
      :precip-prob precip-probability
-     :cloudy (and (some? cloudy) (> cloudy 0.75))}))
+     :cloudy (when (some? cloudy) (> cloudy 0.75))}))
 
 (def key-range
   (let [notes (vals (into (sorted-map) REVERSE-NOTES))
@@ -215,7 +215,7 @@
                 precip (datagen/rand-nth [0 0.002 0.017 0.1 0.4])
                 precip-prob (datagen/float)
                 cloudy (datagen/boolean)}
-           :as daily-data} (into {} (filter val (daily-data->map today)))
+           :as daily-data} (into {} (filter (comp some? val) (daily-data->map today)))
           pitch-key (temperature->key avg-temp)
           interval (if (> precip-prob 0.5)
                      (condp <= precip
@@ -247,6 +247,7 @@
       (println (str (lunar-str lunar-phase)
                     " BPM: " (metro-bpm metro)
                     " 🎵 " pitch-key " " (name interval)
+                    " ☁ " precip " in/hr"
                     " 🌡 " avg-temp " ℉"))
       (->> [(drummachine metro drumsequence)
             (sequencer clock notes #(apply lead %))]
