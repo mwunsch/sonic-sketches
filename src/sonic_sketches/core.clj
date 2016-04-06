@@ -230,19 +230,23 @@
           metro (->> (tempo tempo-map)
                      datagen/rand-nth
                      metronome)
-          clock (clock-signal metro)
+          clock (clock-signal (-> (metro-bpm metro)
+                                  (* 2)
+                                  metronome))
           drums (datagen/reservoir-sample 5 percussion)
           drumsequence (-> (rand-drumsequence drums)
                            (loop-sequence 8))
           lead (partial tb303
                         :amp 0.9
-                        :cutoff (datagen/rand-nth (range 1000 20000))
                         :wave (datagen/rand-nth (range 3))
-                        :decay (/ (metro-tick metro) 1000))
+                        :r (datagen/rand-nth (range 0.01 0.80 0.01))
+                        :decay (/ (metro-tick metro) 1000 2))
           notes (->> scale
                      (rand-notesequence 8)
-                     (repeat 4)
+                     (repeat 8)
                      (apply concat)
+                     (map #(conj %
+                                 :cutoff (datagen/rand-nth (range 1000 20000))))
                      (async/to-chan))]
       (println (str (lunar-str lunar-phase)
                     " BPM: " (metro-bpm metro)
