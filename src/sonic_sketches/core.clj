@@ -296,10 +296,11 @@
   "For a given seed (milliseconds since unix epoch) return its day of
   week as a lower-case string"
   [seed]
-  (let [cal (doto
-                (java.util.Calendar/getInstance)
-              (.setTimeInMillis seed))
-        locale (java.util.Locale/getDefault)]
+  (let [locale java.util.Locale/US
+        tz (java.util.TimeZone/getTimeZone "America/New_York")
+        cal (doto
+                (java.util.Calendar/getInstance tz locale)
+                (.setTimeInMillis seed))]
     (-> cal
         (.getDisplayName java.util.Calendar/DAY_OF_WEEK java.util.Calendar/LONG_STANDALONE locale)
         .toLowerCase)))
