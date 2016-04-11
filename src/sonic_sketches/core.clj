@@ -59,16 +59,12 @@
     out))
 
 (defn drummachine
-  "Accepts a metronome and a vector of instructions. Each instruction
-  is a pair of instruments and a sequence of 0's or 1's. Returns a
-  single async channel that blocks until all sequences have been
-  completed."
-  [nome instructions]
-  (let [bpb (metro-bpb nome)
-        bpm (metro-bpm nome)
-        metro (metronome (* bpm bpb))
-        clock (clock-signal metro)
-        multiclock (async/mult clock)]
+  "Accepts a clock signal and a vector of instructions. Each
+  instruction is a pair of instruments and a sequence of 0's or
+  1's. Returns a single async channel that blocks until all sequences
+  have been completed."
+  [clock instructions]
+  (let [multiclock (async/mult clock)]
     (->> (for [[instrument pulses] instructions
                :let [in (async/to-chan pulses)
                      tap (async/tap multiclock (async/chan))
@@ -227,12 +223,11 @@
           scale (scale pitch-key interval)
           tempo (->> (lunar-illumination lunar-phase)
                      (nth (keys tempo-map)))
-          metro (->> (tempo tempo-map)
-                     datagen/rand-nth
-                     metronome)
-          clock (clock-signal (-> (metro-bpm metro)
-                                  (* 2)
-                                  metronome))
+          bpm (->> (tempo tempo-map)
+                   datagen/rand-nth)
+          metro (metronome (* 2 bpm))
+          drum-clock (clock-signal (metronome (* 4 bpm)))
+          lead-clock (clock-signal metro)
           drums (datagen/reservoir-sample 5 percussion)
           drumsequence (-> (rand-drumsequence drums)
                            (loop-sequence 8))
@@ -240,7 +235,7 @@
                         :amp 0.9
                         :wave (datagen/rand-nth (range 3))
                         :r (datagen/rand-nth (range 0.01 0.80 0.01))
-                        :decay (/ (metro-tick metro) 1000 2))
+                        :decay (/ (metro-tick metro) 1000))
           notes (->> scale
                      (rand-notesequence 8)
                      (repeat 8)
@@ -249,12 +244,12 @@
                                  :cutoff (datagen/rand-nth (range 1000 20000))))
                      (async/to-chan))]
       (println (str (lunar-str lunar-phase)
-                    " BPM: " (metro-bpm metro)
+                    " BPM: " bpm
                     " 🎵 " pitch-key " " (name interval)
                     " ☁ " precip " in/hr"
                     " 🌡 " avg-temp " ℉"))
-      (->> [(drummachine metro drumsequence)
-            (sequencer clock notes #(apply lead %))]
+      (->> [(drummachine drum-clock drumsequence)
+            (sequencer lead-clock notes #(apply lead %))]
            async/merge
            (async/into [])))))
 
