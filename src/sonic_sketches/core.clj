@@ -279,7 +279,7 @@
 (defn play-generated-song
   "A handy convenience function to play a song from a given time, or
   to generate one for the current time."
-  ([] (play-song (now)))
+  ([] (play-generated-song (now)))
   ([seed]
    (let [weather (some-> (forecast/nyc-at seed)
                          :body
