@@ -1,0 +1,8 @@
+application {
+  name = "sonic-sketches"
+  type = "custom"
+}
+
+customization {
+  dev_vagrantfile = "./Vagrantfile"
+}
