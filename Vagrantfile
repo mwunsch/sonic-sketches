@@ -42,15 +42,11 @@ Vagrant.configure(2) do |config|
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:
-  #
-  # config.vm.provider "virtualbox" do |vb|
-  #   # Display the VirtualBox GUI when booting the machine
-  #   vb.gui = true
-  #
-  #   # Customize the amount of memory on the VM:
-  #   vb.memory = "1024"
-  # end
-  #
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.customize ["modifyvm", :id, "--audio", "coreaudio", "--audiocontroller", "ac97"]
+  end
+
   # View the documentation for the provider you are using for more
   # information on available options.
 
@@ -66,10 +62,13 @@ Vagrant.configure(2) do |config|
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
     sudo apt-get update
-    sudo apt-get install -y openjdk-7-jdk
+    sudo usermod -a -G audio vagrant
+    sudo apt-get install -y openjdk-7-jdk alsa-utils
     sudo wget -nv \
               -O /usr/local/bin/lein \
               https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
     sudo chmod a+x /usr/local/bin/lein
+    amixer sset Master 100% unmute
+    amixer sset PCM 100% unmute
   SHELL
 end
