@@ -51,8 +51,8 @@
           (do
             (f step)
             (recur))
-          (let [tick (metro-tick pulse)]
-            (async/<! (async/timeout tick)) ; wait one additional tick before setting val of chan
+          (do
+            (async/<! (async/timeout 1000)) ; wait a sec before setting val of chan
             (async/>! out pulse)
             (async/close! out)))
         (async/close! out)))
