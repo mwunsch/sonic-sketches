@@ -60,39 +60,38 @@ Vagrant.configure(2) do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  config.vm.provision "shell", privileged: false, inline: <<-SHELL
+  config.vm.provision "shell", inline: <<-SHELL
     sudo apt-get update
-    sudo usermod -a -G audio vagrant
-    sudo apt-get install -y -q openjdk-7-jdk alsa-utils
+    sudo apt-get install -y software-properties-common python-software-properties
+    sudo apt-add-repository -y ppa:openjdk-r/ppa
+    sudo apt-get update
+    echo 'jackd2 jackd/tweak_rt_limits boolean true' | sudo debconf-set-selections
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y alsa-utils jackd2 supercollider openjdk-8-jdk
     sudo wget -nv \
               -O /usr/local/bin/lein \
               https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
     sudo chmod a+x /usr/local/bin/lein
+    sudo usermod -a -G audio vagrant
+    echo 'export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket' >> /home/vagrant/.bashrc
     amixer sset Master 100% unmute
     amixer sset PCM 100% unmute
-    echo 'export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket' >> ~/.bashrc
-    echo 'jackd -r -d alsa -r 44100 -P' > ~/.jackdrc
+    cat <<EOF | sudo tee /etc/dbus-1/system.d/org.freedesktop.ReserveDevice1.conf
+<?xml version="1.0" encoding="UTF-8"?> <!-- -*- XML -*- -->
+
+<!DOCTYPE busconfig PUBLIC
+ "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
+<busconfig>
+  <policy group="audio">
+    <allow own="org.freedesktop.ReserveDevice1.Audio0"/>
+  </policy>
+</busconfig>
+EOF
+    su vagrant -c 'pushd /vagrant && lein deps 2>/dev/null'
   SHELL
 end
 
-# Even with the above shell configuration, you run into this thing when you
-# apt-get install jackd2 where it prompts you for realtime priviledges
-# and that's some weird curses screen and it doesn't realize it's not a tty
-# and everything wigs out so do that manually cool?
-#
-# sudo apt-get install -y jackd2
-#
-# Also you need to allow the audio group to do something so that jackd will run:
-#
-# sudo cat >/etc/dbus-1/system.d/org.freedesktop.ReserveDevice1.conf <<EOF
-# <?xml version="1.0" encoding="UTF-8"?> <!-- -*- XML -*- -->
-
-# <!DOCTYPE busconfig PUBLIC
-#  "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
-#  "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
-# <busconfig>
-#   <policy group="audio">
-#     <allow own="org.freedesktop.ReserveDevice1.Audio0"/>
-#   </policy>
-# </busconfig>
-# EOF
+# TODO:
+# + Need to start Jackd reliably
+# + Need Forecast API key in ENV
+# + Need AWS credentials profile for "sonic-sketch"
