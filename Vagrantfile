@@ -92,6 +92,6 @@ EOF
 end
 
 # TODO:
-# + Need to start Jackd reliably
+# + Need to start Jackd reliably (start with -d dummy w/o a soundcard)
 # + Need Forecast API key in ENV
 # + Need AWS credentials profile for "sonic-sketch"
