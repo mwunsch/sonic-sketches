@@ -1,3 +1,4 @@
+# coding: utf-8
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
@@ -72,7 +73,6 @@ Vagrant.configure(2) do |config|
               https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
     sudo chmod a+x /usr/local/bin/lein
     sudo usermod -a -G audio vagrant
-    echo 'export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket' >> /home/vagrant/.bashrc
     amixer sset Master 100% unmute
     amixer sset PCM 100% unmute
     cat <<EOF | sudo tee /etc/dbus-1/system.d/org.freedesktop.ReserveDevice1.conf
@@ -88,10 +88,20 @@ Vagrant.configure(2) do |config|
 </busconfig>
 EOF
     su vagrant -c 'pushd /vagrant && lein deps 2>/dev/null'
+    sudo touch /var/log/jackd.log
+    sudo chown vagrant /var/log/jackd.log
   SHELL
+
+  config.vm.provision "shell", name: "jackd", run: "always", privileged: false do |s|
+    # you need to restart the machine (w/ vagrant reload) in order for
+    # this to run w/o incident. something about the dbus conf not
+    # getting that reservedevice thing
+    s.env = { 'DBUS_SESSION_BUS_ADDRESS' => 'unix:path=/run/dbus/system_bus_socket' }
+    s.inline = 'nohup jackd -R -d alsa -r 44100 -P 0<&- &>/var/log/jackd.log &' # start with -d dummy w/o a soundcard
+  end
 end
 
 # TODO:
-# + Need to start Jackd reliably (start with -d dummy w/o a soundcard)
+# ✓ Need to start Jackd reliably
 # + Need Forecast API key in ENV
 # + Need AWS credentials profile for "sonic-sketch"
