@@ -66,7 +66,7 @@ Vagrant.configure(2) do |config|
     sudo apt-get install -y software-properties-common python-software-properties
     sudo apt-add-repository -y ppa:openjdk-r/ppa
     sudo apt-get update
-    echo 'jackd2 jackd/tweak_rt_limits boolean true' | sudo debconf-set-selections
+    sudo debconf-set-selections <<< "jackd2 jackd/tweak_rt_limits boolean true"
     sudo DEBIAN_FRONTEND=noninteractive apt-get install -y alsa-utils jackd2 supercollider openjdk-8-jdk
     sudo wget -nv \
               -O /usr/local/bin/lein \
