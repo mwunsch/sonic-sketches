@@ -92,6 +92,11 @@ EOF
     sudo chown vagrant /var/log/jackd.log
   SHELL
 
+  config.vm.provision "shell", name: "env", privileged: false do |s|
+    # Use the Host's env FORECAST_API_KEY for guest
+    s.inline = "echo export #{ENV.assoc('FORECAST_API_KEY').join('=')} >> $HOME/.bashrc"
+  end
+
   config.vm.provision "shell", name: "jackd", run: "always", privileged: false do |s|
     # you need to restart the machine (w/ vagrant reload) in order for
     # this to run w/o incident. something about the dbus conf not
@@ -103,5 +108,5 @@ end
 
 # TODO:
 # ✓ Need to start Jackd reliably
-# + Need Forecast API key in ENV
+# ✓ Need Forecast API key in ENV
 # + Need AWS credentials profile for "sonic-sketch"
