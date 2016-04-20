@@ -5,6 +5,11 @@
 Vagrant.configure(2) do |config|
   config.vm.box = "hashicorp/precise64"
 
+  # The below is used w/ Otto to get a shared directory in the virtual
+  # environment. It doesn't work.
+  # See https://github.com/hashicorp/otto/issues/363
+  # config.vm.synced_folder '{{ path.working }}', "/vagrant"
+
   config.vm.provider "virtualbox" do |vb|
     vb.customize ["modifyvm", :id, "--audio", "coreaudio", "--audiocontroller", "ac97"]
   end
@@ -55,4 +60,5 @@ EOF
     s.env = { 'DBUS_SESSION_BUS_ADDRESS' => 'unix:path=/run/dbus/system_bus_socket' }
     s.inline = 'nohup jackd -R -d alsa -r 44100 -P 0<&- &>/var/log/jackd.log &' # start with -d dummy w/o a soundcard
   end
+
 end
