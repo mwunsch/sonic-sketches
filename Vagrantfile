@@ -45,6 +45,9 @@ EOF
     s.inline = "echo export #{ENV.assoc('FORECAST_API_KEY').join('=')} >> $HOME/.bashrc"
   end
 
+  # Copy the Host's aws credentials file to the guest vm
+  config.vm.provision "file", source: "~/.aws/credentials", destination: "~/.aws/credentials"
+
   config.vm.provision "shell", name: "jackd", run: "always", privileged: false do |s|
     # you need to restart the machine (w/ vagrant reload) in order for
     # this to run w/o incident. something about the dbus conf not
@@ -53,8 +56,3 @@ EOF
     s.inline = 'nohup jackd -R -d alsa -r 44100 -P 0<&- &>/var/log/jackd.log &' # start with -d dummy w/o a soundcard
   end
 end
-
-# TODO:
-# ✓ Need to start Jackd reliably
-# ✓ Need Forecast API key in ENV
-# + Need AWS credentials profile for "sonic-sketch"
