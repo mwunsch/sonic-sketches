@@ -5,7 +5,8 @@
             [clojure.core.async :as async]
             [clojure.data.generators :as datagen]
             [amazonica.aws.s3 :as s3]
-            [sonic-sketches.forecast :as forecast])
+            [sonic-sketches.forecast :as forecast]
+            [taoensso.timbre :as logger])
   (:gen-class))
 
 (def signals
@@ -201,7 +202,6 @@
   "With a seed for a RNG, compose a song. Returns a seq of async
   channels."
   [seed & weather]
-  (println "🎲 RNG Seed:" seed)
   (binding [datagen/*rnd* (java.util.Random. seed)]
     (let [today (apply merge weather)
           {:keys [lunar-phase avg-temp length-of-day precip precip-prob cloudy]
@@ -243,11 +243,13 @@
                      (map #(conj %
                                  :cutoff (datagen/rand-nth (range 1000 20000))))
                      (async/to-chan))]
-      (println (str (lunar-str lunar-phase)
-                    " BPM: " bpm
-                    " 🎵 " pitch-key " " (name interval)
-                    " ☁ " precip " in/hr"
-                    " 🌡 " avg-temp " ℉"))
+      (logger/info (str "🎲 RNG Seed: "
+                        seed " "
+                        (lunar-str lunar-phase)
+                        " BPM: " bpm
+                        " 🎵 " pitch-key " " (name interval)
+                        " ☁ " precip " in/hr"
+                        " 🌡 " avg-temp " ℉"))
       (->> [(drummachine drum-clock drumsequence)
             (sequencer lead-clock notes #(apply lead %))]
            async/merge
@@ -256,11 +258,11 @@
 (defmacro make-recording
   [path out]
   `(do
-     (println "🎼 Recording to" ~path "now.")
+     (logger/info "🎼 Recording to" ~path "now.")
      (recording-start ~path)
      (async/<!! ~out)
      (let [recorded# (recording-stop)]
-       (println "Finished recording to" recorded# "🎶")
+       (logger/info "Finished recording to" recorded# "🎶")
        recorded#)))
 
 (defn upload-to-s3
@@ -269,7 +271,7 @@
   (let [credentials {:profile "sonic-sketch"}
         recording (java.io.File. path)
         key-name (.getName recording)]
-    (println "Uploading" key-name "to S3")
+    (logger/info "Uploading" key-name "to S3")
     (s3/put-object credentials
                    :bucket-name "sonic-sketches"
                    :key key-name
@@ -319,4 +321,6 @@
   [& args]
   (volume 0.6)
   (generate->record->upload)
+  (kill-server)
+  (shutdown-agents)
   (System/exit 0))
