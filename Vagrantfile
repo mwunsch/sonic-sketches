@@ -53,11 +53,14 @@ EOF
   # Copy the Host's aws credentials file to the guest vm
   config.vm.provision "file", source: "~/.aws/credentials", destination: "~/.aws/credentials"
 
-  config.vm.provision "shell", name: "jackd", run: "always", privileged: false do |s|
+  config.vm.provision "shell",
+                      name: "jackd",
+                      run: "always",
+                      privileged: false,
+                      env: { 'DBUS_SESSION_BUS_ADDRESS' => 'unix:path=/run/dbus/system_bus_socket' } do |s|
     # you need to restart the machine (w/ vagrant reload) in order for
     # this to run w/o incident. something about the dbus conf not
     # getting that reservedevice thing
-    s.env = { 'DBUS_SESSION_BUS_ADDRESS' => 'unix:path=/run/dbus/system_bus_socket' }
     s.inline = 'nohup jackd -R -d alsa -r 44100 -P 0<&- &>/var/log/jackd.log &' # start with -d dummy w/o a soundcard
   end
 
