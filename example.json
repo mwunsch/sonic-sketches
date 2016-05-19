@@ -12,10 +12,6 @@
     "instance_type": "t2.micro",
     "ssh_username": "ubuntu",
     "ami_name": "packer-example {{timestamp}}"
-  }, {
-    "type": "virtualbox-ovf",
-    "source_path": "~/.vagrant.d/boxes/hashicorp-VAGRANTSLASH-precise64/1.1.0/virtualbox/box.ovf",
-    "ssh_username": "packer"
   }],
   "provisioners": [{
     "type": "shell",
@@ -29,5 +25,6 @@
       "sudo wget -nv -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein",
       "sudo chmod a+x /usr/local/bin/lein"
     ]
-  }]
+  }],
+  "post-processors": ["vagrant"]
 }
