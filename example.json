@@ -25,6 +25,5 @@
       "sudo wget -nv -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein",
       "sudo chmod a+x /usr/local/bin/lein"
     ]
-  }],
-  "post-processors": ["vagrant"]
+  }]
 }
