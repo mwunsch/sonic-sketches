@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e
+
+if [ `uname` == "Darwin" ]; then
+    echo "Please no dont" >&2
+    exit 1
+fi
+
+sudo apt-get update
+sudo apt-get install -y software-properties-common python-software-properties
+sudo apt-add-repository -y ppa:openjdk-r/ppa
+sudo apt-get update
+sudo debconf-set-selections <<< "jackd2 jackd/tweak_rt_limits boolean true"
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y alsa-utils jackd2 supercollider openjdk-8-jdk
+sudo wget -nv \
+     -O /usr/local/bin/lein \
+    https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
+sudo chmod a+x /usr/local/bin/lein
