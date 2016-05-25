@@ -16,7 +16,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "shell", name: "bootstrap", path: "script/provision"
 
-  config.vm.provision "shell", inline: <<-SHELL
+  config.vm.provision "shell", name: "audio", inline: <<-SHELL
     sudo usermod -a -G audio vagrant
     amixer sset Master 100% unmute
     amixer sset PCM 100% unmute
