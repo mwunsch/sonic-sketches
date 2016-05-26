@@ -10,8 +10,8 @@
     "region": "us-east-1",
     "source_ami": "ami-fce3c696",
     "instance_type": "t2.micro",
-    "ssh_username": "ubuntu",
-    "ami_name": "packer-example {{timestamp}}"
+    "ssh_username": "packer",
+    "ami_name": "sonic-sketches-packer {{timestamp}}"
   }],
   "provisioners": [{
     "type": "shell",
