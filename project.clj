@@ -3,6 +3,7 @@
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/core.async "0.2.374"]
                  [org.clojure/data.generators "0.1.2"]
+                 [org.clojure/clojurescript "1.8.51"]
                  [overtone "0.9.1"]
                  [amazonica "0.3.55"]
                  [clj-http "2.1.0"]
