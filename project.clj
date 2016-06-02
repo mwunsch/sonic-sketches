@@ -8,6 +8,9 @@
                  [amazonica "0.3.55"]
                  [clj-http "2.1.0"]
                  [com.taoensso/timbre "4.3.1"]]
+  :plugins [[lein-cljsbuild "1.1.3"]]
+  :cljsbuild {
+    :builds [{:source-paths ["src/cljs"]}]}
   :main ^:skip-aot sonic-sketches.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
