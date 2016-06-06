@@ -11,7 +11,8 @@
     "source_ami": "ami-05dddc6f",
     "instance_type": "t2.micro",
     "ssh_username": "ubuntu",
-    "ami_name": "sonic-sketches-packer {{timestamp}}"
+    "ami_name": "sonic-sketches-packer {{timestamp}}",
+    "tags": {"name": "sonic-sketches"}
   }],
   "provisioners": [{
     "type": "shell",
