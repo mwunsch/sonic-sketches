@@ -8,6 +8,12 @@
         "ImageId": "ami-05dddc6f",
         "InstanceType": "t2.micro"
       }
+    },
+    "Storage": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": "sonic-sketches"
+      }
     }
   ],
   "Parameters": {
