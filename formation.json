@@ -7,13 +7,15 @@
       "Type": "AWS::EC2::KeyPair::KeyName"
     }
   },
-  "Resources": [
+  "Resources": {
     "Compute": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "ImageId": "ami-05dddc6f",
         "InstanceType": "t2.micro",
-        "KeyName": { "Ref": "KeyName" }
+        "KeyName": {
+          "Ref": "KeyName"
+        }
       }
     },
     "Storage": {
@@ -22,5 +24,5 @@
         "BucketName": "sonic-sketches"
       }
     }
-  ],
+  }
 }
