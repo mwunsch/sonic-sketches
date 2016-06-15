@@ -3,7 +3,7 @@
   "Description": "A template for building up a Sonic Sketches cloud. I got hot sauce in my bag, swag.",
   "Parameters": {
     "KeyName": {
-      "Description": "An EC2 KeyPair for SSH Access"
+      "Description": "An EC2 KeyPair for SSH Access",
       "Type": "AWS::EC2::KeyPair::KeyName"
     }
   },
