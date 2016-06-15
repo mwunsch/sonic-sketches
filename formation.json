@@ -1,12 +1,19 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "A template for building up a Sonic Sketches cloud. I got hot sauce in my bag, swag.",
+  "Parameters": {
+    "KeyName": {
+      "Description": "An EC2 KeyPair for SSH Access"
+      "Type": "AWS::EC2::KeyPair::KeyName"
+    }
+  },
   "Resources": [
     "Compute": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "ImageId": "ami-05dddc6f",
-        "InstanceType": "t2.micro"
+        "InstanceType": "t2.micro",
+        "KeyName": { "Ref": "KeyName" }
       }
     },
     "Storage": {
@@ -16,6 +23,4 @@
       }
     }
   ],
-  "Parameters": {
-  }
 }
