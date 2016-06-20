@@ -23,6 +23,9 @@
       "Properties": {
         "BucketName": "sonic-sketches"
       }
+    },
+    "Deployment": {
+      "Type": "AWS::CodeDeploy::Application"
     }
   }
 }
