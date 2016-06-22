@@ -10,6 +10,12 @@
   "Resources": {
     "Compute": {
       "Type": "AWS::EC2::Instance",
+      "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "config": {
+          }
+        }
+      },
       "Properties": {
         "ImageId": "ami-05dddc6f",
         "InstanceType": "t2.micro",
@@ -27,5 +33,7 @@
     "Deployment": {
       "Type": "AWS::CodeDeploy::Application"
     }
+  },
+  "Outputs": {
   }
 }
