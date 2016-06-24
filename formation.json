@@ -10,6 +10,7 @@
   "Resources": {
     "Compute": {
       "Type": "AWS::EC2::Instance",
+      "AvailabilityZone": "us-east-1",
       "Metadata": {
         "AWS::CloudFormation::Init": {
           "config": {
