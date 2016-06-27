@@ -10,7 +10,6 @@
   "Resources": {
     "Compute": {
       "Type": "AWS::EC2::Instance",
-      "AvailabilityZone": "us-east-1",
       "Metadata": {
         "AWS::CloudFormation::Init": {
           "config": {
@@ -23,6 +22,7 @@
         }
       },
       "Properties": {
+        "AvailabilityZone": "us-east-1",
         "ImageId": "ami-05dddc6f",
         "InstanceType": "t2.micro",
         "KeyName": {
