@@ -14,6 +14,11 @@
       "Metadata": {
         "AWS::CloudFormation::Init": {
           "config": {
+            "packages": {
+              "yum": {
+                "jackd2": []
+              }
+            }
           }
         }
       },
@@ -25,14 +30,8 @@
         }
       }
     },
-    "Storage": {
-      "Type": "AWS::S3::Bucket",
-      "Properties": {
-        "BucketName": "sonic-sketches"
-      }
-    },
-    "Deployment": {
-      "Type": "AWS::CodeDeploy::Application"
+    "ObjectStorage": {
+      "Type": "AWS::S3::Bucket"
     }
   },
   "Outputs": {
