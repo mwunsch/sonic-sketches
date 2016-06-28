@@ -22,12 +22,24 @@
         }
       },
       "Properties": {
-        "AvailabilityZone": "us-east-1a",
         "ImageId": "ami-05dddc6f",
         "InstanceType": "t2.micro",
-        "KeyName": {
-          "Ref": "KeyName"
-        }
+        "KeyName": { "Ref": "KeyName" },
+        "SecurityGroups": [{ "Ref": "InstanceSecurityGroup" }]
+      }
+    },
+    "InstanceSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable SSH Access via port 22",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "22",
+            "ToPort": "22",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
       }
     },
     "ObjectStorage": {
@@ -35,5 +47,21 @@
     }
   },
   "Outputs": {
+    "InstanceID": {
+      "Description": "The EC2 Instance ID",
+      "Value": { "Ref": "Compute" }
+    },
+    "PublicDNS": {
+      "Description": "The Public DNS for the EC2 Instance (for SSH)",
+      "Value": {
+        "Fn::GetAtt": ["Compute", "PublicDnsName"]
+      }
+    },
+    "BucketDomain": {
+      "Description": "The DNS Name of the S3 Bucket",
+      "Value": {
+        "Fn::GetAtt": ["ObjectStorage", "DomainName"]
+      }
+    }
   }
 }
