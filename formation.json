@@ -22,9 +22,10 @@
           "apt-add-repository -y ppa:openjdk-r/ppa",
           "apt-get update",
           "debconf-set-selections <<< 'jackd2 jackd/tweak_rt_limits boolean true'",
-          "DEBIAN_FRONTEND=noninteractive apt-get install -y jackd2 supercollider openjdk-8-jdk",
+          "DEBIAN_FRONTEND=noninteractive apt-get install -y jackd2 supercollider openjdk-8-jdk python-setuptools",
           "wget -nv -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein",
-          "chmod a+x /usr/local/bin/lein"
+          "chmod a+x /usr/local/bin/lein",
+          "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz"
         ]]}}
       }
     },
