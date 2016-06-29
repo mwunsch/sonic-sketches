@@ -14,7 +14,18 @@
         "ImageId": "ami-05dddc6f",
         "InstanceType": "t2.micro",
         "KeyName": { "Ref": "KeyName" },
-        "SecurityGroups": [{ "Ref": "InstanceSecurityGroup" }]
+        "SecurityGroups": [{ "Ref": "InstanceSecurityGroup" }],
+        "UserData": { "Fn::Base64": { "Fn::Join": ["\n", [
+          "#!/bin/bash -xe",
+          "apt-get update",
+          "apt-get install -y software-properties-common python-software-properties",
+          "apt-add-repository -y ppa:openjdk-r/ppa",
+          "apt-get update",
+          "debconf-set-selections <<< 'jackd2 jackd/tweak_rt_limits boolean true'",
+          "DEBIAN_FRONTEND=noninteractive apt-get install -y jackd2 supercollider openjdk-8-jdk",
+          "wget -nv -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein",
+          "chmod a+x /usr/local/bin/lein"
+        ]]}}
       }
     },
     "InstanceSecurityGroup": {
