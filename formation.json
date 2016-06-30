@@ -25,8 +25,19 @@
           "DEBIAN_FRONTEND=noninteractive apt-get install -y jackd2 supercollider openjdk-8-jdk python-setuptools",
           "wget -nv -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein",
           "chmod a+x /usr/local/bin/lein",
-          "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz"
+          "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz",
+          { "Fn::Join": [" ", [
+            "cfn-signal -e $? --stack",
+            { "Ref": "AWS::StackName" },
+            "--resource Compute",
+            "--region",
+            { "Ref": "AWS::Region" }]]}
         ]]}}
+      },
+      "CreationPolicy": {
+        "ResourceSignal": {
+          "Timeout": "PT5M"
+        }
       }
     },
     "InstanceSecurityGroup": {
