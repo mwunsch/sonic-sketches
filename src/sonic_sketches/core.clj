@@ -268,12 +268,10 @@
 (defn upload-to-s3
   "Upload a file at path to s3"
   [path & metadata]
-  (let [credentials {:profile "sonic-sketch"}
-        recording (java.io.File. path)
+  (let [recording (java.io.File. path)
         key-name (.getName recording)]
     (logger/info "Uploading" key-name "to S3")
-    (s3/put-object credentials
-                   :bucket-name "sonic-sketches"
+    (s3/put-object :bucket-name "sonic-sketches"
                    :key key-name
                    :file recording
                    :metadata {:user-metadata (apply hash-map metadata)})))
