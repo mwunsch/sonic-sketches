@@ -92,10 +92,6 @@
     }
   },
   "Outputs": {
-    "InstanceID": {
-      "Description": "The EC2 Instance ID",
-      "Value": { "Ref": "Compute" }
-    },
     "PublicDNS": {
       "Description": "The Public DNS for the EC2 Instance (for SSH)",
       "Value": {
