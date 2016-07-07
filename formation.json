@@ -58,6 +58,9 @@
     "ObjectStorage": {
       "Type": "AWS::S3::Bucket"
     },
+    "DeploymentApplication": {
+      "Type": "AWS::CodeDeploy::Application"
+    },
     "InstanceProfile": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
