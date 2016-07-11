@@ -6,3 +6,7 @@ files:
 permissions:
   - object: /srv/sonic_sketches
     owner: ubuntu
+    group: ubuntu
+  - object: .
+    owner: ubuntu
+    group: ubuntu
