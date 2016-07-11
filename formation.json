@@ -75,10 +75,11 @@
         "ApplicationName": { "Ref": "ApplicationDeployment" },
         "Deployment": {
           "Description": "The sonic-sketches application deployment",
+          "IgnoreApplicationStopFailures": "true",
           "Revision": {
             "RevisionType": "GitHub",
             "GitHubLocation": {
-              "CommitId": "6b801960270f17c7687082d72072b238fbe3e455",
+              "CommitId": "82ddae6008458d05be89e9903d53a8c6f3739ea1",
               "Repository": "mwunsch/sonic-sketches"
             }
           }
@@ -89,7 +90,8 @@
           "Value": "sonic-sketches"
         }],
         "ServiceRoleArn": {"Fn::GetAtt": ["CodeDeployServiceRole", "Arn"]}
-      }
+      },
+      "DependsOn": "Compute"
     },
     "InstanceProfile": {
       "Type": "AWS::IAM::InstanceProfile",
