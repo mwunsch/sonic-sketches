@@ -16,17 +16,25 @@
         "InstanceType": "t2.micro",
         "KeyName": { "Ref": "KeyName" },
         "SecurityGroups": [{ "Ref": "InstanceSecurityGroup" }],
+        "Tags": [{
+          "Key": "Application",
+          "Value": "sonic-sketches"
+        }],
         "UserData": { "Fn::Base64": { "Fn::Join": ["\n", [
           "#!/bin/bash -xe",
           "apt-get update",
           "apt-get install -y software-properties-common python-software-properties",
           "apt-add-repository -y ppa:openjdk-r/ppa",
+          "apt-add-repository -y ppa:brightbox/ruby-ng",
           "apt-get update",
           "debconf-set-selections <<< 'jackd2 jackd/tweak_rt_limits boolean true'",
-          "DEBIAN_FRONTEND=noninteractive apt-get install -y jackd2 supercollider openjdk-8-jdk python-setuptools",
+          "DEBIAN_FRONTEND=noninteractive apt-get install -y jackd2 supercollider openjdk-8-jdk python-setuptools ruby2.0",
           "wget -nv -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein",
+          "wget -nv https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install",
+          "chmod +x ./install",
           "chmod a+x /usr/local/bin/lein",
           "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz",
+          "./install auto",
           { "Fn::Join": [" ", [
             "cfn-signal -e $? --stack",
             { "Ref": "AWS::StackName" },
@@ -37,7 +45,7 @@
       },
       "CreationPolicy": {
         "ResourceSignal": {
-          "Timeout": "PT5M"
+          "Timeout": "PT10M"
         }
       }
     },
@@ -65,10 +73,10 @@
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
         "Path": "/",
-        "Roles": [{"Ref": "RootRole"}]
+        "Roles": [{"Ref": "InstanceRole"}]
       }
     },
-    "RootRole": {
+    "InstanceRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -91,6 +99,22 @@
             }]
           }
         }]
+      }
+    },
+    "CodeDeployServiceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Sid": "1",
+            "Effect": "Allow",
+            "Principal": { "Service": ["codedeploy.amazonaws.com"] },
+            "Action": ["sts:AssumeRole"]
+          }]
+        },
+        "ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole"],
+        "Path": "/"
       }
     }
   },
