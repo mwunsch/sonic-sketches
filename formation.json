@@ -66,8 +66,30 @@
     "ObjectStorage": {
       "Type": "AWS::S3::Bucket"
     },
-    "DeploymentApplication": {
+    "ApplicationDeployment": {
       "Type": "AWS::CodeDeploy::Application"
+    },
+    "ApplicationDeploymentGroup": {
+      "Type": "AWS::CodeDeploy::DeploymentGroup",
+      "Properties": {
+        "ApplicationName": { "Ref": "ApplicationDeployment" },
+        "Deployment": {
+          "Description": "The sonic-sketches application deployment",
+          "Revision": {
+            "RevisionType": "GitHub",
+            "GitHubLocation": {
+              "CommitId": "6b801960270f17c7687082d72072b238fbe3e455",
+              "Repository": "mwunsch/sonic-sketches"
+            }
+          }
+        },
+        "Ec2TagFilters": [{
+          "Key": "Application",
+          "Type": "KEY_AND_VALUE",
+          "Value": "sonic-sketches"
+        }],
+        "ServiceRoleArn": {"Fn::GetAtt": ["CodeDeployServiceRole", "Arn"]}
+      }
     },
     "InstanceProfile": {
       "Type": "AWS::IAM::InstanceProfile",
