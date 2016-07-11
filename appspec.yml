@@ -3,3 +3,6 @@ os: linux
 files:
   - source: /
     destination: /srv/sonic_sketches
+permissions:
+  - object: /srv/sonic_sketches
+    owner: ubuntu
