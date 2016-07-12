@@ -5,6 +5,13 @@
     "KeyName": {
       "Description": "An EC2 KeyPair for SSH Access",
       "Type": "AWS::EC2::KeyPair::KeyName"
+    },
+    "RevisionSha": {
+      "Description": "A Git SHA for the revision to be deployed",
+      "Type": "String",
+      "Default": "81b35621e118735468e5c68f745889692e88684f",
+      "MinLength": "40",
+      "MaxLength": "40"
     }
   },
   "Resources": {
@@ -79,7 +86,7 @@
           "Revision": {
             "RevisionType": "GitHub",
             "GitHubLocation": {
-              "CommitId": "82ddae6008458d05be89e9903d53a8c6f3739ea1",
+              "CommitId": { "Ref": "RevisionSha" },
               "Repository": "mwunsch/sonic-sketches"
             }
           }
