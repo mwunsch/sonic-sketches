@@ -16,8 +16,8 @@
     "GitHubRepository": {
       "Description": "A GitHub repository that houses the application. Must be of the form 'username/repo'",
       "Type": "String",
-      "AllowedPattern": "\w+[\/]\S+",
-      "Default": "mwunsch/sonic-sketches"
+      "AllowedPattern": "\\w+[\\/]\\S+",
+      "Default": "mwunsch/sonic-sketches",
       "MinLength": "3"
     }
   },
