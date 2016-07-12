@@ -12,6 +12,13 @@
       "Default": "81b35621e118735468e5c68f745889692e88684f",
       "MinLength": "40",
       "MaxLength": "40"
+    },
+    "GitHubRepository": {
+      "Description": "A GitHub repository that houses the application. Must be of the form 'username/repo'",
+      "Type": "String",
+      "AllowedPattern": "\w+[\/]\S+",
+      "Default": "mwunsch/sonic-sketches"
+      "MinLength": "3"
     }
   },
   "Resources": {
@@ -40,6 +47,7 @@
           "wget -nv https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install",
           "chmod +x ./install",
           "chmod a+x /usr/local/bin/lein",
+          "nohup sudo -i -u ubuntu jackd -R -d dummy -r 44100 -P 0>&- &>/dev/null &",
           "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz",
           "./install auto",
           { "Fn::Join": [" ", [
@@ -87,7 +95,7 @@
             "RevisionType": "GitHub",
             "GitHubLocation": {
               "CommitId": { "Ref": "RevisionSha" },
-              "Repository": "mwunsch/sonic-sketches"
+              "Repository": { "Ref": "GitHubRepository" }
             }
           }
         },
