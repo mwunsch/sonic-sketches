@@ -4,11 +4,11 @@ files:
   - source: /
     destination: /srv/sonic_sketches
 permissions:
-  - object: /srv/sonic_sketches
+  - object: /srv
     owner: ubuntu
     group: ubuntu
 hooks:
-  BeforeInstall:
+  AfterInstall:
     - location: script/deps
       timeout: 1200
       runas: ubuntu
