@@ -9,6 +9,6 @@ permissions:
     group: ubuntu
 hooks:
   AfterInstall:
-    - location: script/deps
+    - location: script/codedeploy-post-install
       timeout: 1200
       runas: ubuntu
