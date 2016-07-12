@@ -7,6 +7,8 @@ permissions:
   - object: /srv/sonic_sketches
     owner: ubuntu
     group: ubuntu
-  - object: .
-    owner: ubuntu
-    group: ubuntu
+hooks:
+  BeforeInstall:
+    - location: script/deps
+      timeout: 600
+      runas: ubuntu
