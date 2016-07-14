@@ -100,9 +100,9 @@
           }
         },
         "Ec2TagFilters": [{
-          "Key": "Application",
+          "Key": "aws:cloudformation:stack-id",
           "Type": "KEY_AND_VALUE",
-          "Value": "sonic-sketches"
+          "Value": { "Ref": "AWS::StackId" }
         }],
         "ServiceRoleArn": {"Fn::GetAtt": ["CodeDeployServiceRole", "Arn"]}
       },
