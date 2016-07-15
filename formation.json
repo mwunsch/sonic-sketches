@@ -19,6 +19,12 @@
       "AllowedPattern": "\\w+[\\/]\\S+",
       "Default": "mwunsch/sonic-sketches",
       "MinLength": "3"
+    },
+    "GitHubScopedToken": {
+      "Description": "A GitHub Personal Access Token with the 'admin:repo_hook' scope",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "255"
     }
   },
   "Resources": {
@@ -167,6 +173,94 @@
       "Properties": {
         "UserName": { "Ref": "DeployingUser" }
       }
+    },
+    "GitHubCodeDeployHook": {
+      "Type": "Custom::GitHubHook",
+      "Properties": {
+        "ServiceToken": {"Fn::GetAtt": ["GitHubHookResourceFunction", "Arn"]},
+        "DeployerAccessKeyId": {"Ref": "DeployingUserAccessKey"},
+        "DeployerSecretAccessKey": {"Fn::GetAtt": ["DeployingUserAccessKey", "SecretAccessKey"]},
+        "ApplicationName": {"Ref": "ApplicationDeployment"},
+        "DeploymentGroup": {"Ref": "ApplicationDeploymentGroup"},
+        "GitHubToken": {"Ref": "GitHubScopedToken"},
+        "GitHubRepo": {"Ref": "GitHubRepository"}
+      }
+    },
+    "GitHubHookResourceFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "ZipFile": { "Fn::Join": ["\n", [
+            "const response = require('cfn-response');",
+            "const http = require('https');",
+            "exports.handler = function(event, context) {",
+            "  var props = event.ResourceProperties;",
+            "  var options = {",
+            "    hostname: 'api.github.com',",
+            "    headers: {",
+            "      'Accept': 'application/vnd.github.v3+json',",
+            "      'Authorization': `token ${props.GitHubToken}`,",
+            "      'User-Agent': `AWS Lambda - ${event.LogicalResourceId}`",
+            "    }",
+            "  };",
+            "  if (event.RequestType === 'Create') {",
+            "    var opt = Object.assign({",
+            "      path: `/repos/${props.GitHubRepo}/hooks`,",
+            "      method: 'POST'",
+            "    }, options);",
+            "    var hook = {",
+            "      name: 'awscodedeploy',",
+            "      config: {",
+            "        application_name: props.ApplicationName,",
+            "        deployment_group: props.DeploymentGroup,",
+            "        aws_access_key_id: props.DeployerAccessKeyId,",
+            "        aws_secret_access_key: props.DeployerSecretAccessKey,",
+            "        aws_region: 'us-east-1'",
+            "      }",
+            "    };",
+            "    var req = http.request(opt, (res) => {;",
+            "      var body = '';",
+            "      res.on('data', (chunk) => body += chunk.toString());",
+            "      res.on('end', () => {",
+            "        console.log(`GitHub Status: ${res.statusCode} ${res.statusMessage} ; Body:\\n ${body}`);",
+            "        if (res.statusCode === 201) {",
+            "          response.send(event, context, response.SUCCESS, { Value: body });",
+            "        } else {",
+            "          response.send(event, context, response.FAILED);",
+            "        };",
+            "      });",
+            "    });",
+            "    req.setTimeout(500);",
+            "    req.write(JSON.stringify(hook));",
+            "    req.end();",
+            "  } else {",
+            "    /* ¯\\_(ツ)_/¯ */",
+            "    console.log(`CFN Delete:\\n ${JSON.stringify(event)}`);",
+            "    response.send(event, context, response.SUCCESS);",
+            "  };",
+            "};"
+          ]]}
+        },
+        "Description": "Creates a GitHub webhook for the CodeDeploy service",
+        "Handler": "index.handler",
+        "Role": {"Fn::GetAtt": ["GitHubHookFnExecutionRole", "Arn"]},
+        "Runtime": "nodejs4.3"
+      }
+    },
+    "GitHubHookFnExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": { "Service": ["lambda.amazonaws.com"] },
+            "Action": ["sts:AssumeRole"]
+          }]
+        },
+        "ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"],
+        "Path": "/"
+      }
     }
   },
   "Outputs": {
@@ -180,16 +274,6 @@
       "Description": "The DNS Name of the S3 Bucket",
       "Value": {
         "Fn::GetAtt": ["ObjectStorage", "DomainName"]
-      }
-    },
-    "DeployerAccessKeyId": {
-      "Description": "The AWS Access Key ID for the Deployer (for GitHub integration)",
-      "Value": { "Ref": "DeployingUserAccessKey" }
-    },
-    "DeployerSecretAccessKey": {
-      "Description": "The AWS Secret Access Key for the Deployer (for GitHub integration) (probably keep secret)",
-      "Value": {
-        "Fn::GetAtt": ["DeployingUserAccessKey", "SecretAccessKey"]
       }
     }
   }
