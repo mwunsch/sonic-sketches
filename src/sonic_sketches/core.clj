@@ -277,7 +277,6 @@
   (let [recording (java.io.File. path)
         key-name (.getName recording)
         bucket "sonic-sketches"]
-    (logger/info "Uploading" key-name "to S3")
     (s3/put-object :bucket-name bucket
                    :key key-name
                    :file recording
@@ -320,7 +319,7 @@
     (logger/info "🎼 Recording to" path "now.")
     (let [[recorded-to song-meta] (make-recording path (gen-song seed (:data daily)))]
       (logger/info "Finished recording to" recorded-to "🎶")
-
+      (logger/info "Uploading" key-name "to S3")
       (upload-to-s3 recorded-to
                     (merge song-meta {:rng-seed seed
                                       :version current-version
