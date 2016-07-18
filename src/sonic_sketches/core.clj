@@ -250,10 +250,19 @@
                         " 🎵 " pitch-key " " (name interval)
                         " ☁ " precip " in/hr"
                         " 🌡 " avg-temp " ℉"))
-      (->> [(drummachine drum-clock drumsequence)
-            (sequencer lead-clock notes #(apply lead %))]
-           async/merge
-           (async/into [])))))
+      (async/go
+        (async/<! (->> [(drummachine drum-clock drumsequence)
+                        (sequencer lead-clock notes #(apply lead %))]
+                       async/merge
+                       (async/into [])))
+        {:rng-seed seed
+         :lunar-phase lunar-phase
+         :lunar-emoji (lunar-str lunar-phase)
+         :bpm bpm
+         :pitch pitch-key
+         :interval (name interval)
+         :precipitation precip
+         :avg-temp avg-temp}))))
 
 (defmacro make-recording
   [path out]
