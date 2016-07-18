@@ -320,7 +320,6 @@
     (logger/info "🎼 Recording to" path "now.")
     (let [[recorded-to song-meta] (make-recording path (gen-song seed (:data daily)))]
       (logger/info "Finished recording to" recorded-to "🎶")
-
       (upload-to-s3 recorded-to
                     (merge song-meta {:rng-seed seed
                                       :version current-version
