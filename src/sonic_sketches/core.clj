@@ -257,7 +257,6 @@
                        (async/into [])))
         {:rng-seed seed
          :lunar-phase lunar-phase
-         :lunar-emoji (lunar-str lunar-phase)
          :bpm bpm
          :pitch pitch-key
          :interval (name interval)
@@ -267,16 +266,14 @@
 (defmacro make-recording
   [path out]
   `(do
-     (logger/info "🎼 Recording to" ~path "now.")
      (recording-start ~path)
-     (async/<!! ~out)
-     (let [recorded# (recording-stop)]
-       (logger/info "Finished recording to" recorded# "🎶")
-       recorded#)))
+     (let [songmap# (async/<!! ~out)
+           recorded# (recording-stop)]
+       [recorded# songmap#])))
 
 (defn upload-to-s3
   "Upload a file at path to s3"
-  [path & metadata]
+  [path metadata]
   (let [recording (java.io.File. path)
         key-name (.getName recording)
         bucket "sonic-sketches"]
@@ -284,7 +281,7 @@
     (s3/put-object :bucket-name bucket
                    :key key-name
                    :file recording
-                   :metadata {:user-metadata (apply hash-map metadata)})))
+                   :metadata {:user-metadata metadata})))
 
 (defn play-generated-song
   "A handy convenience function to play a song from a given time, or
@@ -317,13 +314,18 @@
         tempfile (java.io.File/createTempFile (str day-of-week "-") ".wav")
         path (.getPath tempfile)
         current-version (System/getProperty "sonic-sketches.version")
-        {:keys [latitude longitude daily] :as weather} (:body (forecast/nyc-at seed))]
-    (-> (make-recording path
-                        (gen-song seed (:data daily)))
-        (upload-to-s3 :rng-seed seed
-                      :version current-version
-                      :latitude latitude
-                      :longitude longitude))))
+        {:keys [latitude longitude daily] :as weather} (try (:body (forecast/nyc-at seed))
+                                                            (catch Exception e (logger/error "Error fetching Forecast API"
+                                                                                             (.getMessage e))))]
+    (logger/info "🎼 Recording to" path "now.")
+    (let [[recorded-to song-meta] (make-recording path (gen-song seed (:data daily)))]
+      (logger/info "Finished recording to" recorded-to "🎶")
+
+      (upload-to-s3 recorded-to
+                    (merge song-meta {:rng-seed seed
+                                      :version current-version
+                                      :latitude latitude
+                                      :longitude longitude})))))
 
 (defn -main
   [& args]
