@@ -85,7 +85,8 @@
       }
     },
     "ObjectStorage": {
-      "Type": "AWS::S3::Bucket"
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy": "Retain"
     },
     "ApplicationDeployment": {
       "Type": "AWS::CodeDeploy::Application"
