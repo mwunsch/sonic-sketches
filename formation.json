@@ -226,7 +226,7 @@
             "      res.on('end', () => {",
             "        console.log(`GitHub Status: ${res.statusCode} ${res.statusMessage} ; Body:\\n ${body}`);",
             "        if (res.statusCode === 201) {",
-            "          response.send(event, context, response.SUCCESS, { Value: body });",
+            "          response.send(event, context, response.SUCCESS, { Value: body }, JSON.parse(body).url);",
             "        } else {",
             "          response.send(event, context, response.FAILED);",
             "        };",
