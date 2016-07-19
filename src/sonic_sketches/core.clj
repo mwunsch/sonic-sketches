@@ -273,11 +273,10 @@
 
 (defn upload-to-s3
   "Upload a file at path to s3"
-  [path metadata]
+  [bucket path metadata]
   (let [recording (java.io.File. path)
-        key-name (.getName recording)
-        bucket "sonic-sketches"]
-    (logger/info "Uploading" key-name "to S3")
+        key-name (.getName recording)]
+    (logger/info "Uploading" key-name "to S3 bucket" bucket)
     (s3/put-object :bucket-name bucket
                    :key key-name
                    :file recording
@@ -314,13 +313,15 @@
         tempfile (java.io.File/createTempFile (str day-of-week "-") ".wav")
         path (.getPath tempfile)
         current-version (System/getProperty "sonic-sketches.version")
+        bucket (or (first args) "sonic-sketches")
         {:keys [latitude longitude daily] :as weather} (try (:body (forecast/nyc-at seed))
                                                             (catch Exception e (logger/error "Error fetching Forecast API"
                                                                                              (.getMessage e))))]
     (logger/info "🎼 Recording to" path "now.")
     (let [[recorded-to song-meta] (make-recording path (gen-song seed (:data daily)))]
       (logger/info "Finished recording to" recorded-to "🎶")
-      (upload-to-s3 recorded-to
+      (upload-to-s3 bucket
+                    recorded-to
                     (merge song-meta {:rng-seed seed
                                       :version current-version
                                       :latitude latitude
@@ -329,7 +330,7 @@
 (defn -main
   [& args]
   (volume 0.6)
-  (generate->record->upload)
+  (apply generate->record->upload args)
   (kill-server)
   (shutdown-agents)
   (System/exit 0))
