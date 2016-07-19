@@ -113,7 +113,7 @@
         }],
         "ServiceRoleArn": {"Fn::GetAtt": ["CodeDeployServiceRole", "Arn"]}
       },
-      "DependsOn": "Compute"
+      "DependsOn": ["Compute", "CodeDeployServiceRole"]
     },
     "InstanceProfile": {
       "Type": "AWS::IAM::InstanceProfile",
