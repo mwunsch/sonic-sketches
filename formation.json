@@ -210,6 +210,7 @@
             "    }, options);",
             "    var hook = {",
             "      name: 'awscodedeploy',",
+            "      events: ['deployment'],",
             "      config: {",
             "        application_name: props.ApplicationName,",
             "        deployment_group: props.DeploymentGroup,",
