@@ -24,7 +24,8 @@
       "Description": "A GitHub Personal Access Token with the 'admin:repo_hook' scope",
       "Type": "String",
       "MinLength": "1",
-      "MaxLength": "255"
+      "MaxLength": "255",
+      "NoEcho": "true"
     }
   },
   "Resources": {
