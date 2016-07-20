@@ -49,13 +49,13 @@
           "apt-get update",
           "debconf-set-selections <<< 'jackd2 jackd/tweak_rt_limits boolean true'",
           "DEBIAN_FRONTEND=noninteractive apt-get install -y jackd2 supercollider openjdk-8-jdk python-setuptools ruby2.0",
-          "wget -nv -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein",
+          "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz",
           "wget -nv https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install",
           "chmod +x ./install",
+          "./install auto",
+          "wget -nv -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein",
           "chmod a+x /usr/local/bin/lein",
           "nohup sudo -i -u ubuntu jackd -R -d dummy -r 44100 -P 0>&- &>/dev/null &",
-          "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz",
-          "./install auto",
           { "Fn::Join": [" ", [
             "cfn-signal -e $? --stack",
             { "Ref": "AWS::StackName" },
@@ -66,7 +66,7 @@
       },
       "CreationPolicy": {
         "ResourceSignal": {
-          "Timeout": "PT10M"
+          "Timeout": "PT15M"
         }
       }
     },
