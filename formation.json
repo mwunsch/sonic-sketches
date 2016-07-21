@@ -26,6 +26,11 @@
       "MinLength": "1",
       "MaxLength": "255",
       "NoEcho": "true"
+    },
+    "ForecastApiKey": {
+      "Description": "An API Key for the Dark Sky Forecast API",
+      "Type": "String",
+      "MaxLength": "255"
     }
   },
   "Resources": {
