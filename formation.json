@@ -62,6 +62,16 @@
           "wget -nv -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein",
           "chmod a+x /usr/local/bin/lein",
           "nohup sudo -i -u ubuntu jackd -R -d dummy -r 44100 -P 0>&- &>/dev/null &",
+          "crontab -u ubuntu - <<EOF",
+          {"Fn::Join": ["=",["FORECAST_API_KEY", {"Ref": "ForecastApiKey"}]]},
+          {"Fn::Join": [" ", [
+            "0 13 * * *",
+            "cd /srv/sonic_sketches &&",
+            "/usr/local/bin/lein trampoline run",
+            {"Ref": "ObjectStorage"},
+            ">/dev/null 2>&1"
+          ]]},
+          "EOF",
           { "Fn::Join": [" ", [
             "cfn-signal -e $? --stack",
             { "Ref": "AWS::StackName" },
