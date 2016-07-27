@@ -1,4 +1,4 @@
-(defproject sonic-sketches "0.5.0-SNAPSHOT"
+(defproject sonic-sketches "0.6.0-SNAPSHOT"
   :description "Studies in Clojure and Overtone"
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/core.async "0.2.374"]
