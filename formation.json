@@ -9,7 +9,7 @@
     "RevisionSha": {
       "Description": "A Git SHA for the revision to be deployed",
       "Type": "String",
-      "Default": "41eece52a18cc3d2839e220ae6a292840c8ee5c5",
+      "Default": "54a7c124a088d1ca651cc506aad0ffc2050c42cf",
       "MinLength": "40",
       "MaxLength": "40"
     },
