@@ -64,10 +64,9 @@
           "nohup sudo -i -u ubuntu jackd -R -d dummy -r 44100 -P 0>&- &>/dev/null &",
           "crontab -u ubuntu - <<EOF",
           {"Fn::Join": ["=",["FORECAST_API_KEY", {"Ref": "ForecastApiKey"}]]},
-          "TZ=America/New_York",
           {"Fn::Join": [" ", [
             "0 13 * * *",
-            "[ $(date +\\%z) = '-0400' ] &&",
+            "[ $(TZ='America/New_York' date +\\%z) = '-0400' ] &&",
             "cd /srv/sonic_sketches &&",
             "/usr/local/bin/lein trampoline run",
             {"Ref": "ObjectStorage"},
@@ -75,7 +74,7 @@
           ]]},
           {"Fn::Join": [" ", [
             "0 14 * * *",
-            "[ $(date +\\%z) = '-0500' ] &&",
+            "[ $(TZ='America/New_York' date +\\%z) = '-0500' ] &&",
             "cd /srv/sonic_sketches &&",
             "/usr/local/bin/lein trampoline run",
             {"Ref": "ObjectStorage"},
