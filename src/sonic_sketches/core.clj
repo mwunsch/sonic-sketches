@@ -293,24 +293,21 @@
                          :data)]
      (gen-song seed weather))))
 
-(defn get-day-of-week
-  "For a given seed (milliseconds since unix epoch) return its day of
-  week as a lower-case string"
+(defn day-of-week-and-iso8601
+  "For a given seed (milliseconds since unix epoch) return a vector
+  pair of day-of-week and iso8601 date"
   [seed]
-  (let [locale java.util.Locale/US
-        tz (java.util.TimeZone/getTimeZone "America/New_York")
-        cal (doto
-                (java.util.Calendar/getInstance tz locale)
-                (.setTimeInMillis seed))]
-    (-> cal
-        (.getDisplayName java.util.Calendar/DAY_OF_WEEK java.util.Calendar/LONG_STANDALONE locale)
-        .toLowerCase)))
+  (let [tz (java.time.ZoneId/of "America/New_York")
+        instant (java.time.Instant/ofEpochMilli seed)
+        datetime (java.time.LocalDateTime/ofInstant instant tz)]
+    [(.toLowerCase (.format datetime (java.time.format.DateTimeFormatter/ofPattern "EEEE")))
+     (.format datetime java.time.format.DateTimeFormatter/ISO_LOCAL_DATE)]))
 
 (defn generate->record->upload
   [& args]
   (let [seed (now)
-        day-of-week (get-day-of-week seed)
-        tempfile (java.io.File/createTempFile (str day-of-week "-") ".wav")
+        [day-of-week iso8601] (day-of-week-and-iso8601 seed)
+        tempfile (java.io.File/createTempFile (str day-of-week "_" iso8601 "_") ".wav")
         path (.getPath tempfile)
         current-version (System/getProperty "sonic-sketches.version")
         bucket (or (first args) "sonic-sketches")
@@ -322,10 +319,11 @@
       (logger/info "Finished recording to" recorded-to "🎶")
       (upload-to-s3 bucket
                     recorded-to
-                    (merge song-meta {:rng-seed seed
-                                      :version current-version
+                    (merge song-meta {:version current-version
                                       :latitude latitude
-                                      :longitude longitude})))))
+                                      :longitude longitude
+                                      :day-of-week day-of-week
+                                      :iso8601 iso8601})))))
 
 (defn -main
   [& args]
