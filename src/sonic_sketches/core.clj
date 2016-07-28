@@ -293,21 +293,22 @@
                          :data)]
      (gen-song seed weather))))
 
-(defn day-of-week-and-iso8601
-  "For a given seed (milliseconds since unix epoch) return a vector
-  pair of day-of-week and iso8601 date"
+(defn local-datetime
+  "For a given seed (milliseconds since unix epoch) return a java LocalDateTime"
   [seed]
   (let [tz (java.time.ZoneId/of "America/New_York")
-        instant (java.time.Instant/ofEpochMilli seed)
-        datetime (java.time.LocalDateTime/ofInstant instant tz)]
-    [(.toLowerCase (.format datetime (java.time.format.DateTimeFormatter/ofPattern "EEEE")))
-     (.format datetime java.time.format.DateTimeFormatter/ISO_LOCAL_DATE)]))
+        instant (java.time.Instant/ofEpochMilli seed)]
+    (java.time.LocalDateTime/ofInstant instant tz)))
 
 (defn generate->record->upload
   [& args]
   (let [seed (now)
-        [day-of-week iso8601] (day-of-week-and-iso8601 seed)
-        tempfile (java.io.File/createTempFile (str day-of-week "_" iso8601 "_") ".wav")
+        datetime (local-datetime seed)
+        day-of-week (-> datetime
+                        (.format (java.time.format.DateTimeFormatter/ofPattern "EEEE"))
+                        .toLowerCase)
+        iso8601 (.format datetime java.time.format.DateTimeFormatter/ISO_LOCAL_DATE)
+        tempfile (java.io.File/createTempFile (str day-of-week "-" iso8601 "_") ".wav")
         path (.getPath tempfile)
         current-version (System/getProperty "sonic-sketches.version")
         bucket (or (first args) "sonic-sketches")
