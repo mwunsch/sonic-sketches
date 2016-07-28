@@ -318,13 +318,15 @@
     (logger/info "🎼 Recording to" path "now.")
     (let [[recorded-to song-meta] (make-recording path (gen-song seed (:data daily)))]
       (logger/info "Finished recording to" recorded-to "🎶")
-      (upload-to-s3 bucket
-                    recorded-to
-                    (merge song-meta {:version current-version
-                                      :latitude latitude
-                                      :longitude longitude
-                                      :day-of-week day-of-week
-                                      :iso8601 iso8601})))))
+      (try (upload-to-s3 bucket
+                     recorded-to
+                     (merge song-meta {:version current-version
+                                       :latitude latitude
+                                       :longitude longitude
+                                       :day-of-week day-of-week
+                                       :iso8601 iso8601}))
+           (catch Exception e (logger/fatal "Error uploading to s3"
+                                            (.getMessage e)))))))
 
 (defn -main
   [& args]
