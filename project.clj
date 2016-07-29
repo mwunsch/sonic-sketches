@@ -6,7 +6,8 @@
                  [overtone "0.9.1"]
                  [amazonica "0.3.55"]
                  [clj-http "2.1.0"]
-                 [com.taoensso/timbre "4.3.1"]]
+                 [com.taoensso/timbre "4.3.1"]
+                 [org.twitter4j/twitter4j-core "4.0.4"]]
   :main ^:skip-aot sonic-sketches.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
