@@ -2,10 +2,11 @@
   "Utilities for connecting to the Forecast API (https://developer.forecast.io/)"
   (:use [clojure.string :only [join]])
   (:require [clj-http.client :as http]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [environ.core :refer [env]]))
 
 (def api-key
-  (System/getenv "FORECAST_API_KEY"))
+  (env :forecast-api-key))
 
 (defn call
   "Performs a call to the Forecast API for a daily summary. Accepts a
