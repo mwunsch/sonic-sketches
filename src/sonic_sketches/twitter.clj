@@ -8,9 +8,24 @@
 (defonce client (TwitterFactory/getSingleton))
 
 (defn wav->mp4
+  "Convert a path to a wav to an mp4. Returns a file object to the mp4."
   [path]
-  (let [out "test.mp4"]
-    (sh "ffmpeg" "-i" path "-strict" "experimental" out)))
+  (let [wav (java.io.File. path)
+        dir (.getParent wav)
+        filename (clojure.string/replace (.getName wav) #"\.wav" ".mp4")
+        mp4 (java.io.File. dir filename)
+        ffmpeg (sh "ffmpeg" "-y" "-i" path
+                   "-filter_complex"
+                   "[0:a]showwaves=s=320x180:mode=line,format=yuv420p[v]"
+                   "-map" "[v]" "-map" "0:a" "-b:a" "64k" "-b:v" "256k"
+                   (.getPath mp4))]
+    (if (zero? (:exit ffmpeg))
+      mp4
+      (throw (Exception. (str "Error converting wav" (:err ffmpeg)))))))
+
+(defn upload-media
+  [file]
+  (comment "TK. (https://dev.twitter.com/rest/media/uploading-media#chunkedupload)"))
 
 (defn mkstatus
   [songdata]
@@ -26,6 +41,8 @@
   (let [{:keys [latitude longitude]} metadata
         statusmsg (mkstatus metadata)
         geo (GeoLocation. latitude longitude)
+        mp4 (wav->mp4 path)
         status (doto (StatusUpdate. statusmsg)
-                 (.setLocation geo))]
-    (.updateStatus client status)))
+                 (.setLocation geo)
+                 (.setMedia mp4))]
+    (.updateStatus client status))) ;; This doesn't work. Twitter4j doesn't support uploading video
