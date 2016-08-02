@@ -61,6 +61,7 @@
           "./install auto",
           "wget -nv -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein",
           "chmod a+x /usr/local/bin/lein",
+          "wget -nv -O - http://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz | tar xvJ && cp -v ffmpeg-3.1.1-64bit-static/ffmpeg /usr/local/bin/",
           "nohup sudo -i -u ubuntu jackd -R -d dummy -r 44100 -P 0>&- &>/dev/null &",
           "crontab -u ubuntu - <<EOF",
           {"Fn::Join": ["=",["FORECAST_API_KEY", {"Ref": "ForecastApiKey"}]]},
