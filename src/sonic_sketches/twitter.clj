@@ -1,7 +1,8 @@
 (ns sonic-sketches.twitter
   "Utilities for uploading a song to Twitter"
   (:use [clojure.java.shell :only [sh]]
-        [clojure.string :only [capitalize]])
+        [clojure.string :only [capitalize]]
+        [sonic-sketches.emoji])
   (:require [clj-http.client :as http]
             [clojure.data.json :as json]
             [oauth.client :as oauth]
@@ -64,10 +65,33 @@
 
 (defn mkstatus
   [songdata]
-  (let [{:keys [day-of-week iso8601 lunar-phase avg-temp precipitation]} songdata
+  (let [{:keys [day-of-week iso8601 lunar-phase avg-temp precipitation interval]} songdata
         day (capitalize day-of-week)
-        message (format "It is %s." day)]
-    (str message "\n\n" lunar-phase))) ;; TODO: Convert to emoji
+        greetings [(format "It is %s. " day)
+                   (format "It's %s. " day)
+                   (format "Today is %s. " day)
+                   (format "Good morning. It's %s. " day)
+                   (format "Happy %s. " day)
+                   (format "Today is %s. Good morning. " day)]
+        greeting (rand-nth greetings)
+        follow-ups (cond (> avg-temp 80) ["It will be hot today."
+                                          "Looks like it will be a hot one."
+                                          "It's hot."
+                                          ""]
+                         (< avg-temp 30) ["It's cold out there."
+                                          "Hace frio."
+                                          "Brrr. It's chilly today."
+                                          "⛄"
+                                          ""]
+                         (> precipitation 0.1) ["Consider an Umbrella."
+                                                "Looks like rain."
+                                                ""]
+                         :else ["Have a nice day."
+                                "Do your best."
+                                ""])]
+    (str greeting (rand-nth follow-ups)
+         "\n\n" (lunar-str lunar-phase)
+         " " (precip-str-from-interval interval))))
 
 (defn tweet
   "Tweet the song from a path"

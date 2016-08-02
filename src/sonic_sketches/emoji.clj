@@ -13,3 +13,13 @@
                    (/ (quot 100 indices))
                    float
                    Math/round))))
+
+(defn precip-str-from-interval
+  [interval]
+  (case interval
+    :minor "⛈"
+    :minor-pentatonic "🌧"
+    :harmonic-minor "☔"
+    :major-pentatonic "🌥"
+    :lydian "⛅"
+    "☀"))
