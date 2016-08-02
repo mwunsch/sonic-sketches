@@ -67,12 +67,13 @@
   [songdata]
   (let [{:keys [day-of-week iso8601 lunar-phase avg-temp precipitation interval]} songdata
         day (capitalize day-of-week)
-        greetings [(format "It is %s. " day)
-                   (format "It's %s. " day)
-                   (format "Today is %s. " day)
-                   (format "Good morning. It's %s. " day)
-                   (format "Happy %s. " day)
-                   (format "Today is %s. Good morning. " day)]
+        greetings [(format "It is %s." day)
+                   (format "It's %s." day)
+                   (format "Today is %s." day)
+                   (format "Good morning. It's %s." day)
+                   (format "Happy %s." day)
+                   (format "Today is %s. Good morning." day)
+                   (format "🎵 %s 🎶" day)]
         greeting (rand-nth greetings)
         follow-ups (cond (> avg-temp 80) ["It will be hot today."
                                           "Looks like it will be a hot one."
@@ -89,9 +90,10 @@
                          :else ["Have a nice day."
                                 "Do your best."
                                 ""])]
-    (str greeting (rand-nth follow-ups)
+    (str greeting " " (rand-nth follow-ups)
          "\n\n" (lunar-str lunar-phase)
-         " " (precip-str-from-interval interval))))
+         " " (precip-str-from-interval interval)
+         " " (temp-emoji avg-temp))))
 
 (defn tweet
   "Tweet the song from a path"
