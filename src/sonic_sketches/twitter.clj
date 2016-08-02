@@ -5,8 +5,6 @@
   (:require [clj-http.client :as http]
             [clojure.data.json :as json]
             [oauth.client :as oauth]
-            [clj-http.client :as http]
-            [clojure.data.json :as json]
             [environ.core :refer [env]])
   (:import [twitter4j TwitterFactory StatusUpdate GeoLocation]))
 
