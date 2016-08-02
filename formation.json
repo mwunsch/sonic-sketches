@@ -65,11 +65,12 @@
           "nohup sudo -i -u ubuntu jackd -R -d dummy -r 44100 -P 0>&- &>/dev/null &",
           "crontab -u ubuntu - <<EOF",
           {"Fn::Join": ["=",["FORECAST_API_KEY", {"Ref": "ForecastApiKey"}]]},
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
           {"Fn::Join": [" ", [
             "0 13 * * *",
             "[ $(TZ='America/New_York' date +\\%z) = '-0400' ] &&",
             "cd /srv/sonic_sketches &&",
-            "/usr/local/bin/lein trampoline run",
+            "lein trampoline run",
             {"Ref": "ObjectStorage"},
             ">/dev/null 2>&1"
           ]]},
