@@ -1,5 +1,6 @@
 (ns sonic-sketches.core
-  (:use [overtone.live])
+  (:use [overtone.live]
+        [sonic-sketches.emoji])
   (:require [overtone.inst.drum :as drums]
             [overtone.inst.synth :refer [tb303]]
             [clojure.core.async :as async]
@@ -140,19 +141,6 @@
       (/ 10)
       float
       Math/round))
-
-(defn lunar-str
-  "Given a lunar phase number, returns an Emoji string displaying a
-  visual representation of the moon for that phase."
-  [phase]
-  (let [moons (->> (range 0x1f311 0x1f319)
-                   (map int)
-                   (mapv (partial format "%c")))
-        indices (- (count moons) 1)]
-    (nth moons (-> phase
-                   (/ (quot 100 indices))
-                   float
-                   Math/round))))
 
 (defn daily-data->map
   "Returns a  map of valuable  data points computed from  Forecast API
@@ -305,10 +293,9 @@
   (let [seed (now)
         datetime (local-datetime seed)
         day-of-week (-> datetime
-                        (.format (java.time.format.DateTimeFormatter/ofPattern "EEEE"))
-                        .toLowerCase)
+                        (.format (java.time.format.DateTimeFormatter/ofPattern "EEEE")))
         iso8601 (.format datetime java.time.format.DateTimeFormatter/ISO_LOCAL_DATE)
-        tempfile (java.io.File/createTempFile (str day-of-week "-" iso8601 "_") ".wav")
+        tempfile (java.io.File/createTempFile (str (.toLowerCase day-of-week) "-" iso8601 "_") ".wav")
         path (.getPath tempfile)
         current-version (System/getProperty "sonic-sketches.version")
         bucket (or (first args) "sonic-sketches")
