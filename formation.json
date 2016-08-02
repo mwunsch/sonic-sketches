@@ -31,6 +31,24 @@
       "Description": "An API Key for the Dark Sky Forecast API",
       "Type": "String",
       "MaxLength": "255"
+    },
+    "TwitterConsumerKey": {
+      "Description": "A Consumer Key for a Twitter OAuth app",
+      "Type": "String"
+    },
+    "TwitterConsumerSecret": {
+      "Description": "A Consumer Secret for a Twitter OAuth app",
+      "Type": "String",
+      "NoEcho": "true"
+    },
+    "TwitterAccessToken": {
+      "Description": "A Twitter API Access Token",
+      "Type": "String"
+    },
+    "TwitterAccessTokenSecret": {
+      "Description": "A Twitter API Access Token Secret",
+      "Type": "String",
+      "NoEcho": "true"
     }
   },
   "Resources": {
@@ -61,6 +79,19 @@
           "./install auto",
           "wget -nv -O /usr/local/bin/lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein",
           "chmod a+x /usr/local/bin/lein",
+          "mkdir -p /etc/leiningen/",
+          "cat <<EOF > /etc/leiningen/profiles.clj",
+          "{:system {:jvm-opts [",
+          {"Fn::Join": ["",[
+            "  \"-Dtwitter4j.oauth.consumerKey=", {"Ref": "TwitterConsumerKey"}, "\""]]},
+          {"Fn::Join": ["",[
+            "  \"-Dtwitter4j.oauth.consumerSecret=", {"Ref": "TwitterConsumerSecret"}, "\""]]},
+          {"Fn::Join": ["",[
+            "  \"-Dtwitter4j.oauth.accessToken=", {"Ref": "TwitterAccessToken"}, "\""]]},
+          {"Fn::Join": ["",[
+            "  \"-Dtwitter4j.oauth.accessTokenSecret=", {"Ref": "TwitterAccessTokenSecret"}, "\""]]},
+          "]}}",
+          "EOF",
           "wget -nv -O - http://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz | tar xvJ && cp -v ffmpeg-3.1.1-64bit-static/ffmpeg /usr/local/bin/",
           "nohup sudo -i -u ubuntu jackd -R -d dummy -r 44100 -P 0>&- &>/dev/null &",
           "crontab -u ubuntu - <<EOF",
