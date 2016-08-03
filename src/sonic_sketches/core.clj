@@ -311,12 +311,16 @@
                                      :day-of-week day-of-week
                                      :iso8601 iso8601})]
       (logger/info "Finished recording to" recorded-to "🎶")
-      (try (upload-to-s3 bucket recorded-to metadata)
-           (catch Exception e (logger/fatal "Error uploading to s3"
-                                            (.getMessage e))))
-      (try (twitter/tweet recorded-to metadata)
-           (catch Exception e (logger/fatal "Error posting to Twitter"
-                                            (.getMessage e))))
+      (->> (vector (async/go (try (upload-to-s3 bucket recorded-to metadata)
+                                  (catch Exception e (logger/fatal "Error uploading to s3"
+                                                                   (.getMessage e)))))
+                   (async/go (logger/info "Posting" recorded-to "to Twitter")
+                             (try (twitter/tweet recorded-to metadata)
+                                  (catch Exception e (logger/fatal "Error posting to Twitter"
+                                                                   (.getMessage e))))))
+           async/merge
+           (async/into [])
+           async/<!!)
       {recorded-to metadata})))
 
 (defn -main
