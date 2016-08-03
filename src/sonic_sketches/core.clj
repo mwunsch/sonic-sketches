@@ -7,6 +7,7 @@
             [clojure.data.generators :as datagen]
             [amazonica.aws.s3 :as s3]
             [sonic-sketches.forecast :as forecast]
+            [sonic-sketches.twitter :as twitter]
             [taoensso.timbre :as logger])
   (:gen-class))
 
@@ -303,17 +304,20 @@
                                                             (catch Exception e (logger/error "Error fetching Forecast API"
                                                                                              (.getMessage e))))]
     (logger/info "🎼 Recording to" path "now.")
-    (let [[recorded-to song-meta] (make-recording path (gen-song seed (:data daily)))]
+    (let [[recorded-to song-meta] (make-recording path (gen-song seed (:data daily)))
+          metadata (merge song-meta {:version current-version
+                                     :latitude latitude
+                                     :longitude longitude
+                                     :day-of-week day-of-week
+                                     :iso8601 iso8601})]
       (logger/info "Finished recording to" recorded-to "🎶")
-      (try (upload-to-s3 bucket
-                     recorded-to
-                     (merge song-meta {:version current-version
-                                       :latitude latitude
-                                       :longitude longitude
-                                       :day-of-week day-of-week
-                                       :iso8601 iso8601}))
+      (try (upload-to-s3 bucket recorded-to metadata)
            (catch Exception e (logger/fatal "Error uploading to s3"
-                                            (.getMessage e)))))))
+                                            (.getMessage e))))
+      (try (twitter/tweet recorded-to metadata)
+           (catch Exception e (logger/fatal "Error posting to Twitter"
+                                            (.getMessage e))))
+      {recorded-to metadata})))
 
 (defn -main
   [& args]
