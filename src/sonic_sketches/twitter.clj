@@ -31,12 +31,15 @@
 
 (defn wav->mp4
   "Convert a path to a wav to an mp4. Returns a file object to the mp4."
-  [path]
+  [path seed]
   (let [wav (java.io.File. path)
         dir (.getParent wav)
         filename (clojure.string/replace (.getName wav) #"\.wav" ".mp4")
         mp4 (java.io.File. dir filename)
-        filter "[0:a]showwaves=s=640x360:r=20:mode=cline:colors=SpringGreen,format=yuv420p[v]"
+        filter (str "[0:a]showwaves=s=640x360:r=20:mode=cline:colors=SpringGreen[fg];"
+                    "life=s=640x360:ratio=0.2:mold=2:life_color=DarkCyan:death_color=DarkOrchid:"
+                    "seed=" (.intValue seed) "[bg];"
+                    "[bg][fg]overlay=shortest=1,format=yuv420p[v]")
         ffmpeg (sh "ffmpeg" "-y" "-i" path
                    "-filter_complex"
                    filter
@@ -99,10 +102,10 @@
 (defn tweet
   "Tweet the song from a path"
   [path metadata]
-  (let [{:keys [latitude longitude]} metadata
+  (let [{:keys [latitude longitude rng-seed]} metadata
         statusmsg (mkstatus metadata)
         geo (GeoLocation. latitude longitude)
-        mp4 (wav->mp4 path)
+        mp4 (wav->mp4 path rng-seed)
         media-id (:media_id (upload-media mp4))
         media-id-array (into-array Long/TYPE [media-id])
         status (doto (StatusUpdate. statusmsg)
