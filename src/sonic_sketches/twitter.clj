@@ -36,9 +36,10 @@
         dir (.getParent wav)
         filename (clojure.string/replace (.getName wav) #"\.wav" ".mp4")
         mp4 (java.io.File. dir filename)
+        filter "[0:a]showwaves=s=320x180:r=20:mode=cline:colors=SpringGreen,format=yuv420p[v]"
         ffmpeg (sh "ffmpeg" "-y" "-i" path
                    "-filter_complex"
-                   "[0:a]showwaves=s=320x180:mode=line,format=yuv420p[v]"
+                   filter
                    "-map" "[v]" "-map" "0:a" "-b:a" "64k" "-b:v" "256k"
                    (.getPath mp4))]
     (if (zero? (:exit ffmpeg))
