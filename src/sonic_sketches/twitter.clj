@@ -6,7 +6,8 @@
   (:require [clj-http.client :as http]
             [clojure.data.json :as json]
             [oauth.client :as oauth]
-            [environ.core :refer [env]])
+            [environ.core :refer [env]]
+            [clojure.data.generators :as datagen])
   (:import [twitter4j TwitterFactory StatusUpdate GeoLocation]))
 
 (defonce client (TwitterFactory/getSingleton))
@@ -78,7 +79,7 @@
                    (format "Happy %s." day)
                    (format "Today is %s. Good morning." day)
                    (format "🎵 %s 🎶" day)]
-        greeting (rand-nth greetings)
+        greeting (datagen/rand-nth greetings)
         follow-ups (cond (> avg-temp 80) ["It will be hot today."
                                           "Looks like it will be a hot one."
                                           "It's hot."
@@ -94,7 +95,7 @@
                          :else ["Have a nice day."
                                 "Do your best."
                                 ""])]
-    (str greeting " " (rand-nth follow-ups)
+    (str greeting " " (datagen/rand-nth follow-ups)
          "\n\n" (lunar-str lunar-phase)
          " " (precip-str-from-interval interval)
          " " (temp-emoji avg-temp))))
@@ -102,13 +103,14 @@
 (defn tweet
   "Tweet the song from a path"
   [path metadata]
-  (let [{:keys [latitude longitude rng-seed]} metadata
-        statusmsg (mkstatus metadata)
-        geo (GeoLocation. latitude longitude)
-        mp4 (wav->mp4 path rng-seed)
-        media-id (:media_id (upload-media mp4))
-        media-id-array (into-array Long/TYPE [media-id])
-        status (doto (StatusUpdate. statusmsg)
-                 (.setLocation geo)
-                 (.setMediaIds media-id-array))]
-    (.updateStatus client status)))
+  (let [{:keys [latitude longitude rng-seed]} metadata]
+    (binding [datagen/*rnd* (java.util.Random. rng-seed)]
+      (let [statusmsg (mkstatus metadata)
+            geo (GeoLocation. latitude longitude)
+            mp4 (wav->mp4 path rng-seed)
+            media-id (:media_id (upload-media mp4))
+            media-id-array (into-array Long/TYPE [media-id])
+            status (doto (StatusUpdate. statusmsg)
+                     (.setLocation geo)
+                     (.setMediaIds media-id-array))]
+        (.updateStatus client status)))))
