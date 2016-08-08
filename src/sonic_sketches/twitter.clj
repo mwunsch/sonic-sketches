@@ -30,6 +30,38 @@
                                        params)]
     (http/post uri (apply merge {:query-params (merge credentials params)} more))))
 
+(def ffmpeg-colors
+  "A list of ffmpeg colors. From:
+    ffmpeg -colors 2>/dev/null | tail -n +2 | awk '{print $1}'"
+  (map str '(AliceBlue AntiqueWhite Aqua Aquamarine Azure
+             Beige Bisque Black BlanchedAlmond Blue
+             BlueViolet Brown BurlyWood CadetBlue Chartreuse
+             Chocolate Coral CornflowerBlue Cornsilk Crimson
+             Cyan DarkBlue DarkCyan DarkGoldenRod DarkGray
+             DarkGreen DarkKhaki DarkMagenta DarkOliveGreen Darkorange
+             DarkOrchid DarkRed DarkSalmon DarkSeaGreen DarkSlateBlue
+             DarkSlateGray DarkTurquoise DarkViolet DeepPink DeepSkyBlue
+             DimGray DodgerBlue FireBrick FloralWhite ForestGreen
+             Fuchsia Gainsboro GhostWhite Gold GoldenRod
+             Gray Green GreenYellow HoneyDew HotPink
+             IndianRed Indigo Ivory Khaki Lavender
+             LavenderBlush LawnGreen LemonChiffon LightBlue LightCoral
+             LightCyan LightGoldenRodYellow LightGreen LightGrey LightPink
+             LightSalmon LightSeaGreen LightSkyBlue LightSlateGray LightSteelBlue
+             LightYellow Lime LimeGreen Linen Magenta
+             Maroon MediumAquaMarine MediumBlue MediumOrchid MediumPurple
+             MediumSeaGreen MediumSlateBlue MediumSpringGreen MediumTurquoise MediumVioletRed
+             MidnightBlue MintCream MistyRose Moccasin NavajoWhite
+             Navy OldLace Olive OliveDrab Orange
+             OrangeRed Orchid PaleGoldenRod PaleGreen PaleTurquoise
+             PaleVioletRed PapayaWhip PeachPuff Peru Pink
+             Plum PowderBlue Purple Red RosyBrown
+             RoyalBlue SaddleBrown Salmon SandyBrown SeaGreen
+             SeaShell Sienna Silver SkyBlue SlateBlue
+             SlateGray Snow SpringGreen SteelBlue Tan
+             Teal Thistle Tomato Turquoise Violet
+             Wheat White WhiteSmoke Yellow YellowGreen)))
+
 (defn wav->mp4
   "Convert a path to a wav to an mp4. Returns a file object to the mp4."
   [path seed]
@@ -37,8 +69,9 @@
         dir (.getParent wav)
         filename (clojure.string/replace (.getName wav) #"\.wav" ".mp4")
         mp4 (java.io.File. dir filename)
-        filter (str "[0:a]showwaves=s=640x360:r=20:mode=cline:colors=SpringGreen[fg];"
-                    "life=s=640x360:ratio=0.2:mold=2:life_color=DarkCyan:death_color=DarkOrchid:"
+        [wavecolor lifecolor deathcolor] (datagen/reservoir-sample 3 ffmpeg-colors)
+        filter (str "[0:a]showwaves=s=640x360:r=20:mode=cline:colors=" wavecolor "[fg];"
+                    "life=s=640x360:ratio=0.1:mold=2:life_color=" lifecolor ":death_color=" deathcolor ":"
                     "seed=" (.intValue seed) "[bg];"
                     "[bg][fg]overlay=shortest=1,format=yuv420p[v]")
         ffmpeg (sh "ffmpeg" "-y" "-i" path
