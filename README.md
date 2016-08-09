@@ -17,8 +17,21 @@ problems involved in:
 + Leiningen, and the ecosystem around Clojure on the JVM
 + core.async, and Communicating Sequential Processes
 
-Originally meant as an exercise in the above topics, this repository
-has evolved.
+The final form of this project is the [@sonic_sketches][1] Twitter
+bot. Each day at 9 am NYC time, the program is run. The program takes
+weather data from the [Forecast API][2] and uses it and a Random
+Number Generator to generate a song, which is then uploaded to
+Twitter.
 
-The new goal of this work is to make an automated Bot that
-regularly produces generated musical compositions.
+Along with the above stated goals, the project is also an exercise in
+productionizing the above process with:
+
++ AWS CodeDeploy for Continuous Delivery
++ AWS CloudFormation for automating the infrastructure
++ Vagrant for creating a reproducible development environment
++ The AWS ecosystem, generally
++ FFmpeg for handling multimedia files
+
+[1]: https://twitter.com/sonic_sketches
+
+[2]: https://developer.forecast.io
