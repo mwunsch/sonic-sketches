@@ -122,16 +122,18 @@
                                           "Brrr. It's chilly today."
                                           "⛄"
                                           ""]
-                         (> precipitation 0.1) ["Consider an Umbrella."
+                         (> precipitation 0.02) ["Consider an Umbrella."
                                                 "Looks like rain."
                                                 ""]
                          :else ["Have a nice day."
                                 "Do your best."
                                 ""])]
-    (str greeting " " (datagen/rand-nth follow-ups)
-         "\n\n" (lunar-str lunar-phase)
-         " " (precip-str-from-interval interval)
-         " " (temp-emoji avg-temp))))
+    (clojure.string/join " " [greeting
+                              (datagen/rand-nth follow-ups)
+                              "\n\n"
+                              (lunar-str lunar-phase)
+                              (precip-str-from-interval (keyword interval))
+                              (temp-emoji avg-temp)])))
 
 (defn tweet
   "Tweet the song from a path"
