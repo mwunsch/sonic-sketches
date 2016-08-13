@@ -72,7 +72,7 @@
         [wavecolor lifecolor deathcolor] (datagen/reservoir-sample 3 ffmpeg-colors)
         filter (str "[0:a]showwaves=s=640x360:r=20:mode=cline:colors=" wavecolor "[fg];"
                     "life=s=640x360:ratio=0.1:mold=2:life_color=" lifecolor ":death_color=" deathcolor ":"
-                    "seed=" (.intValue seed) "[bg];"
+                    "seed=" (Math/abs (.intValue seed)) "[bg];"
                     "[bg][fg]overlay=shortest=1,format=yuv420p[v]")
         ffmpeg (sh "ffmpeg" "-y" "-i" path
                    "-filter_complex"
