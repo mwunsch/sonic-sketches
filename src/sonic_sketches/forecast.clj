@@ -14,7 +14,7 @@
   from `System/currentTimeMillis`). Will throw an Exception if
   unsuccessful."
   [lat lon time]
-  (let [base-url "https://api.forecast.io/forecast"
+  (let [base-url "https://api.darksky.net/forecast"
         unix-time (quot time 1000)
         path (join "," (map str [lat lon unix-time]))
         url (join "/" [base-url api-key path])]
